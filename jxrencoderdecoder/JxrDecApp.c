@@ -75,7 +75,7 @@ typedef struct tagWMPDECAPPARGS
 void WmpDecAppUsage(const char* szExe)
 {
     printf(CRLF);
-    printf("Windows Media Photo Encoder Utility" CRLF);
+    printf("Windows Media Photo Decoder Utility" CRLF);
     printf("Copyright 2012 Microsoft Corporation - All Rights Reserved" CRLF); 
     printf(CRLF);
     printf("%s [options]..." CRLF, szExe);
