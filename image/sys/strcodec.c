@@ -100,6 +100,7 @@ Int checkImageBuffer(CWMImageStrCodec * pSC, size_t cWidth, size_t cRows)
     const COLORFORMAT cf = pSC->WMISCP.bYUVData ?
         pSC->m_param.cfColorFormat : pSC->WMII.cfColorFormat;
     size_t cBytes;
+    Bool bLessThan64Bit = sizeof(void *) < 8;
 
     if(cf == YUV_420)
         cRows = (cRows + 1) / 2;
@@ -109,7 +110,7 @@ Int checkImageBuffer(CWMImageStrCodec * pSC, size_t cWidth, size_t cRows)
     if(cf == YUV_422 || cf == YUV_420)
         cWidth = (cWidth + 1) / 2;
 
-    if (sizeof(void *) < 8 && (cWidth >> ((sizeof(size_t) * 8 - 5)))) {
+    if (bLessThan64Bit && (cWidth >> ((sizeof(size_t) * 8 - 5)))) {
         /** potential overflow - 32 bit pointers insufficient to address cache **/
         /** this uses 2 macroblock row constraint, which is tighter than ensuring rollover doesn't occur below **/
         return ICERR_ERROR;
@@ -137,7 +138,7 @@ U8 readQPIndex(BitIOInfo * pIO, U32 cBits)
     if(getBit16(pIO, 1))
         return 0; // default QP
 
-    return getBit16(pIO, cBits) + 1;
+    return (U8) getBit16(pIO, cBits) + 1;
 }
 
 Void getTilePos(CWMImageStrCodec* pSC, size_t mbX, size_t mbY)
@@ -237,6 +238,8 @@ Void swapMRPtr(CWMImageStrCodec* pSC)
 //================================================================
 Int IDPEmpty(CWMImageStrCodec* pSC)
 {
+    UNREFERENCED_PARAMETER( pSC );
+
     return ICERR_OK;
 }
 
@@ -308,7 +311,7 @@ Bool EOSWS_File(struct WMPStream* pWS)
 
 ERR ReadWS_File(struct WMPStream* pWS, void* pv, size_t cb)
 {
-    ERR err = WMP_errSuccess;
+    // ERR err = WMP_errSuccess;
 
     return (fread(pv, cb, 1, pWS->state.file.pFile) == 1) ? WMP_errSuccess : WMP_errFileIO;
 }
@@ -491,7 +494,7 @@ ERR CloseWS_List(struct WMPStream** ppWS)
             pBuf = pNext;
             pNext = (U8 *)(((void **)(pBuf))[0]);
 //printf ("delete buffer    %x\n", pBuf);
-            Call(WMPFree(&pBuf));
+            Call(WMPFree((void**)&pBuf));
         }
     }
     Call(WMPFree((void**)ppWS));
@@ -731,7 +734,7 @@ Int allocateBitIOInfo(CWMImageStrCodec* pSC)
     if(cNumBitIO > 0){
         U32 i = 0;
         size_t cb = sizeof(BitIOInfo) * cNumBitIO + (PACKETLENGTH * 4 - 1) + PACKETLENGTH * 4 * cNumBitIO;
-        U8* pb = (char*)malloc(cb);
+        U8* pb = (U8*)malloc(cb);
 
         if (NULL == pb) return ICERR_ERROR;
         memset(pb, 0, cb);
@@ -1061,6 +1064,8 @@ U32 getPosRead(BitIOInfo* pIO)
 #ifndef ARMOPT_BITIO
 ERR attachISRead(BitIOInfo* pIO, struct WMPStream* pWS, CWMImageStrCodec* pSC)
 {
+    UNREFERENCED_PARAMETER( pSC );
+
     pWS->GetPos(pWS, &pIO->offRef);
 
     pIO->pbStart = (U8*)pIO - PACKETLENGTH * 2;
@@ -1085,6 +1090,8 @@ ERR attachISRead(BitIOInfo* pIO, struct WMPStream* pWS, CWMImageStrCodec* pSC)
 ERR readIS(CWMImageStrCodec* pSC, BitIOInfo* pIO)
 {
     ERR err = WMP_errSuccess;
+
+    UNREFERENCED_PARAMETER( pSC );
 
     if (PACKET1(pIO->pbStart, pIO->pbCurrent, PACKETLENGTH))
     {
@@ -1152,6 +1159,8 @@ ERR writeIS(CWMImageStrCodec* pSC, BitIOInfo* pIO)
 {
     ERR err = WMP_errSuccess;
 
+    UNREFERENCED_PARAMETER( pSC );
+
     if (PACKET1(pIO->pbStart, pIO->pbCurrent, PACKETLENGTH))
     {
         PERFTIMER_STOP(pSC->m_fMeasurePerf, pSC->m_ptEncDecPerf);
@@ -1212,7 +1221,7 @@ void OutputIndivPerfTimer(struct PERFTIMERSTATE *pPerfTimer,
             {
                 printf("   *** WARNING: %d time intervals were measured as zero. "
                     "This perf timer has insufficient precision!\n\n",
-                    rResults.iZeroTimeIntervals);
+                    (int) rResults.iZeroTimeIntervals);
             }
         }
     }
@@ -1233,7 +1242,7 @@ void OutputPerfTimerReport(CWMImageStrCodec *pState)
     
     fltMegaPixels = (float)pState->WMII.cWidth * pState->WMII.cHeight / 1000000;
     printf("Image Width = %d, Height = %d, total MegaPixels = %.1f MP\n",
-        pState->WMII.cWidth, pState->WMII.cHeight, fltMegaPixels);
+        (int) pState->WMII.cWidth, (int) pState->WMII.cHeight, fltMegaPixels);
 
     OutputIndivPerfTimer(pState->m_ptEncDecPerf, "m_ptEncDecPerf", "excl I/O", fltMegaPixels);
     OutputIndivPerfTimer(pState->m_ptEndToEndPerf, "m_ptEndToEndPerf", "incl I/O", fltMegaPixels);

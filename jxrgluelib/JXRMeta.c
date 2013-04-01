@@ -366,17 +366,17 @@ ERR BufferCopyIFD(const U8* pbsrc, U32 cbsrc, U32 ofssrc, U8 endian, U8* pbdst, 
         FailIf(type == 0 || type >= sizeof(IFDEntryTypeSizes) / sizeof(IFDEntryTypeSizes[0]), WMP_errFail);
         if ( tag == WMP_tagEXIFMetadata )
         {
-            ofsEXIFIFDEntry = ofsdstdir;
+            ofsEXIFIFDEntry = (U16) ofsdstdir;
             ofsEXIFIFD = value;
         }
         else if ( tag == WMP_tagGPSInfoMetadata )
         {
-            ofsGPSInfoIFDEntry = ofsdstdir;
+            ofsGPSInfoIFDEntry = (U16) ofsdstdir;
             ofsGPSInfoIFD = value;
         }
         else if ( tag == WMP_tagInteroperabilityIFD )
         {
-            ofsInteroperabilityIFDEntry = ofsdstdir;
+            ofsInteroperabilityIFDEntry = (U16) ofsdstdir;
             ofsInteroperabilityIFD = value;
         }
         else
@@ -524,17 +524,17 @@ ERR StreamCopyIFD(struct WMPStream* pWS, U32 ofssrc, U8* pbdst, U32 cbdst, U32* 
         FailIf(type == 0 || type >= sizeof(IFDEntryTypeSizes) / sizeof(IFDEntryTypeSizes[0]), WMP_errFail);
         if ( tag == WMP_tagEXIFMetadata )
         {
-            ofsEXIFIFDEntry = ofsdstdir;
+            ofsEXIFIFDEntry = (U16) ofsdstdir;
             ofsEXIFIFD = value;
         }
         else if ( tag == WMP_tagGPSInfoMetadata )
         {
-            ofsGPSInfoIFDEntry = ofsdstdir;
+            ofsGPSInfoIFDEntry = (U16) ofsdstdir;
             ofsGPSInfoIFD = value;
         }
         else if ( tag == WMP_tagInteroperabilityIFD )
         {
-            ofsInteroperabilityIFDEntry = ofsdstdir;
+            ofsInteroperabilityIFDEntry = (U16) ofsdstdir;
             ofsInteroperabilityIFD = value;
         }
         else
@@ -674,7 +674,7 @@ ERR ReadBinaryData(__in_ecount(1) struct WMPStream* pWS,
     ERR err = WMP_errSuccess;
     U8 *pbData = NULL;
 
-    Call(PKAlloc(&pbData, uCount + 2)); // Allocate buffer to store data with space for an added ascii or unicode null
+    Call(PKAlloc((void **) &pbData, uCount + 2)); // Allocate buffer to store data with space for an added ascii or unicode null
     if (uCount <= 4)
     {
         unsigned int i;
@@ -697,7 +697,7 @@ Cleanup:
     if (Failed(err))
     {
         if (pbData)
-            PKFree(&pbData);
+            PKFree((void **) &pbData);
     }
     return err;
 }
@@ -710,7 +710,7 @@ ERR ReadPropvar(__in_ecount(1) struct WMPStream* pWS,
                 __out_win DPKPROPVARIANT *pvar)
 {
     ERR err = WMP_errSuccess;
-    U8 *pbData = NULL;
+    // U8 *pbData = NULL;
 
     memset(pvar, 0, sizeof(*pvar));
     if (uCount == 0)
@@ -720,10 +720,10 @@ ERR ReadPropvar(__in_ecount(1) struct WMPStream* pWS,
     {
         case WMP_typASCII:
             pvar->vt = DPKVT_LPSTR;
-            Call(ReadBinaryData(pWS, uCount, uValue, &pvar->pszVal));
-            assert(0 == pvar->pszVal[uCount - 1]); // Check that it's null-terminated
+            Call(ReadBinaryData(pWS, uCount, uValue, (U8 **) &pvar->VT.pszVal));
+            assert(0 == pvar->VT.pszVal[uCount - 1]); // Check that it's null-terminated
             // make sure (ReadBinaryData allocated uCount + 2 so this and unicode can have forced nulls)
-            pvar->pszVal[uCount] = 0;
+            pvar->VT.pszVal[uCount] = 0;
             break;
 
         case WMP_typBYTE:
@@ -732,19 +732,19 @@ ERR ReadPropvar(__in_ecount(1) struct WMPStream* pWS,
             // used to convey unicode (which does not require a count field). Caller knows
             // uCount and can convert to safearray if necessary.
             pvar->vt = (DPKVT_BYREF | DPKVT_UI1);
-            Call(ReadBinaryData(pWS, uCount, uValue, &pvar->pbVal));
+            Call(ReadBinaryData(pWS, uCount, uValue, &pvar->VT.pbVal));
             break;
 
         case WMP_typSHORT:
             if (1 == uCount)
             {
                 pvar->vt = DPKVT_UI2;
-                pvar->uiVal = (U16)(uValue & 0x0000FFFF);
+                pvar->VT.uiVal = (U16)(uValue & 0x0000FFFF);
             }
             else if (2 == uCount)
             {
                 pvar->vt = DPKVT_UI4;
-                pvar->ulVal = uValue;
+                pvar->VT.ulVal = uValue;
             }
             else
             {

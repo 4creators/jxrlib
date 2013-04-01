@@ -254,25 +254,23 @@ typedef long ERR;
     fprintf(stderr, "        %s:%ld" CRLF, (szFile), (nLine));  \
 
 #else
-#define Report(err, szExp, szFile, lLine) ((void)0)
+#define Report(err, szExp, szFile, lLine) err = err
 #endif
 
-#define Call(exp) do \
-{ \
+#define Call(exp) \
     if (Failed(err = (exp))) \
     { \
         Report(err, #exp, __FILE__, (long)__LINE__); \
         goto Cleanup; \
     } \
-} while(0) \
+    else err = err
 
-#define CallIgnoreError(errTmp, exp) do \
-{ \
+#define CallIgnoreError(errTmp, exp) \
     if (Failed(errTmp = (exp))) \
     { \
         Report(errTmp, #exp, __FILE__, (long)__LINE__); \
     } \
-} while(0) \
+    else errTmp = errTmp
 
 
 #define Test(exp, err) Call((exp) ? WMP_errSuccess : (err))

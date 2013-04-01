@@ -53,11 +53,12 @@ Void smooth(PixelI * p2, PixelI * p1, PixelI * p0, PixelI * q0, PixelI * q1, Pix
 Int initPostProc(struct tagPostProcInfo * strPostProcInfo[MAX_CHANNELS][2], size_t mbWidth, size_t iNumChannels)
 {
     size_t i, j, k, l;
+    Bool b32bit = sizeof(int) == 4;
     
     for(j = 0; j < iNumChannels; j ++){
         for(i = 0; i < 2; i ++){
             // 2 more are allocated to avoid boundary check
-            if(sizeof(int) == 4) // integer overlow/underflow check for 32-bit system
+            if(b32bit) // integer overlow/underflow check for 32-bit system
                 if((((mbWidth + 2) >> 16) * sizeof(struct tagPostProcInfo)) & 0xffff0000)
                     return ICERR_ERROR;
             strPostProcInfo[j][i] = (struct tagPostProcInfo *)malloc((mbWidth + 2) * sizeof(struct tagPostProcInfo));

@@ -36,6 +36,8 @@
 ERR RGB24_BGR24(PKFormatConverter* pFC, const PKRect* pRect, U8* pb, U32 cbStride)
 {
     I32 i = 0, j = 0;
+
+    UNREFERENCED_PARAMETER( pFC );
    
     for (i = 0; i < pRect->Height; ++i)
     {
@@ -61,6 +63,8 @@ ERR BGR24_RGB24(PKFormatConverter* pFC, const PKRect* pRect, U8* pb, U32 cbStrid
 ERR RGB24_BGR32(PKFormatConverter* pFC, const PKRect* pRect, U8* pb, U32 cbStride)
 {
     I32 i = 0, j = 0;
+
+    UNREFERENCED_PARAMETER( pFC );
    
     for (i = 0; i < pRect->Height; ++i)
     {
@@ -82,6 +86,8 @@ ERR RGB24_BGR32(PKFormatConverter* pFC, const PKRect* pRect, U8* pb, U32 cbStrid
 ERR BGR32_RGB24(PKFormatConverter* pFC, const PKRect* pRect, U8* pb, U32 cbStride)
 {
     I32 i = 0, j = 0;
+
+    UNREFERENCED_PARAMETER( pFC );
    
     for (i = 0; i < pRect->Height; ++i)
     {
@@ -103,6 +109,8 @@ ERR BGR32_RGB24(PKFormatConverter* pFC, const PKRect* pRect, U8* pb, U32 cbStrid
 ERR RGB24_Gray8(PKFormatConverter* pFC, const PKRect* pRect, U8* pb, U32 cbStride)
 {
     I32 i = 0, j = 0, k = 0;
+
+    UNREFERENCED_PARAMETER( pFC );
     
     for (i = 0; i < pRect->Height; ++i)
     {
@@ -135,6 +143,8 @@ Cleanup:
 ERR Gray8_RGB24(PKFormatConverter* pFC, const PKRect* pRect, U8* pb, U32 cbStride)
 {
     I32 i = 0, j = 0, k = 0;
+
+    UNREFERENCED_PARAMETER( pFC );
     
     for (i = 0; i < pRect->Height; ++i)
     {
@@ -164,6 +174,8 @@ ERR RGB48_BGR48(PKFormatConverter* pFC, const PKRect* pRect, U8* pb, U32 cbStrid
     ERR err = WMP_errSuccess;
 
     I32 i = 0, j = 0;
+
+    UNREFERENCED_PARAMETER( pFC );
     
     Call(PKFormatConverter_Copy(pFC, pRect, pb, cbStride));
 
@@ -196,7 +208,9 @@ ERR RGB48_Gray16(PKFormatConverter* pFC, const PKRect* pRect, U8* pb, U32 cbStri
     ERR err = WMP_errSuccess;
 
     I32 i = 0, j = 0, k = 0;
-    
+ 
+    UNREFERENCED_PARAMETER( pFC );
+   
     Call(PKFormatConverter_Copy(pFC, pRect, pb, cbStride));
 
     for (i = 0; i < pRect->Height; ++i)
@@ -228,6 +242,8 @@ ERR RGBA128Fixed_RGBA128Float(PKFormatConverter* pFC, const PKRect* pRect, U8* p
     const float fltCvtFactor = 1.0F / (1 << 24);
     I32 y;
 
+    UNREFERENCED_PARAMETER( pFC );
+
     for (y = 0; y < iHeight; y++)
     {
         I32 x;
@@ -248,6 +264,8 @@ ERR RGBA128Float_RGBA128Fixed(PKFormatConverter* pFC, const PKRect* pRect, U8* p
     const I32 iWidthX4 = 4 * pRect->Width; // 4 == R, G, B, A
     const float fltCvtFactor = (float)(1 << 24);
     I32 y;
+
+    UNREFERENCED_PARAMETER( pFC );
 
     for (y = 0; y < iHeight; y++)
     {
@@ -271,6 +289,8 @@ ERR RGB96Fixed_RGB96Float(PKFormatConverter* pFC, const PKRect* pRect, U8* pb, U
     const float fltCvtFactor = 1.0F / (1 << 24);
     I32 y;
 
+    UNREFERENCED_PARAMETER( pFC );
+
     for (y = 0; y < iHeight; y++)
     {
         I32 x;
@@ -291,6 +311,8 @@ ERR RGB128Fixed_RGB96Float(PKFormatConverter* pFC, const PKRect* pRect, U8* pb, 
     const I32 iWidth = pRect->Width;
     const float fltCvtFactor = 1.0F / (1 << 24);
     I32 y;
+
+    UNREFERENCED_PARAMETER( pFC );
 
     for (y = 0; y < iHeight; y++)
     {
@@ -318,6 +340,8 @@ ERR RGB96Float_RGB96Fixed(PKFormatConverter* pFC, const PKRect* pRect, U8* pb, U
     const float fltCvtFactor = (float) (1 << 24);
     I32 y;
 
+    UNREFERENCED_PARAMETER( pFC );
+
     for (y = 0; y < iHeight; y++)
     {
         I32 x;
@@ -338,6 +362,8 @@ ERR RGB96Float_RGB128Fixed(PKFormatConverter* pFC, const PKRect* pRect, U8* pb, 
     const I32 iWidth = pRect->Width;
     const float fltCvtFactor = (float) (1 << 24);
     I32 y;
+
+    UNREFERENCED_PARAMETER( pFC );
 
     assert(iWidth > 2); // Otherwise, we corrupt source data in inner loop
     for (y = iHeight - 1; y >= 0; y--)
@@ -365,6 +391,8 @@ ERR RGB96Float_RGB128Float(PKFormatConverter* pFC, const PKRect* pRect, U8* pb, 
     const I32 iWidth = pRect->Width;
     I32 y;
 
+    UNREFERENCED_PARAMETER( pFC );
+
     assert(iWidth > 2); // Otherwise, we corrupt source data in inner loop
     for (y = iHeight - 1; y >= 0; y--)
     {
@@ -391,6 +419,8 @@ ERR RGB128Float_RGB96Float(PKFormatConverter* pFC, const PKRect* pRect, U8* pb, 
     const I32 iWidth = pRect->Width;
     I32 y;
 
+    UNREFERENCED_PARAMETER( pFC );
+
     for (y = 0; y < iHeight; y++)
     {
         I32 x;
@@ -414,6 +444,8 @@ ERR RGB48Half_RGB64Half(PKFormatConverter* pFC, const PKRect* pRect, U8* pb, U32
     const I32 iHeight = pRect->Height;
     const I32 iWidth = pRect->Width;
     I32 y;
+
+    UNREFERENCED_PARAMETER( pFC );
 
     assert(iWidth > 2); // Otherwise, we corrupt source data in inner loop
     for (y = iHeight - 1; y >= 0; y--)
@@ -441,6 +473,8 @@ ERR RGB64Half_RGB48Half(PKFormatConverter* pFC, const PKRect* pRect, U8* pb, U32
     const I32 iWidth = pRect->Width;
     I32 y;
 
+    UNREFERENCED_PARAMETER( pFC );
+
     for (y = 0; y < iHeight; y++)
     {
         I32 x;
@@ -464,6 +498,8 @@ ERR BGR24_BGR32(PKFormatConverter* pFC, const PKRect* pRect, U8* pb, U32 cbStrid
     const I32 iHeight = pRect->Height;
     const I32 iWidth = pRect->Width;
     I32 y;
+
+    UNREFERENCED_PARAMETER( pFC );
 
     assert(iWidth > 2); // Otherwise, we corrupt source data in inner loop
     for (y = iHeight - 1; y >= 0; y--)
@@ -491,6 +527,8 @@ ERR BGR32_BGR24(PKFormatConverter* pFC, const PKRect* pRect, U8* pb, U32 cbStrid
     const I32 iWidth = pRect->Width;
     I32 y;
 
+    UNREFERENCED_PARAMETER( pFC );
+
     for (y = 0; y < iHeight; y++)
     {
         I32 x;
@@ -516,6 +554,8 @@ ERR Gray32Fixed_Gray32Float(PKFormatConverter* pFC, const PKRect* pRect, U8* pb,
     const float fltCvtFactor = 1.0F / (1 << 24);
     I32 y;
 
+    UNREFERENCED_PARAMETER( pFC );
+
     for (y = 0; y < iHeight; y++)
     {
         I32 x;
@@ -536,6 +576,8 @@ ERR Gray32Float_Gray32Fixed(PKFormatConverter* pFC, const PKRect* pRect, U8* pb,
     const I32 iWidth = pRect->Width;
     const float fltCvtFactor = (float) (1 << 24);
     I32 y;
+
+    UNREFERENCED_PARAMETER( pFC );
 
     for (y = 0; y < iHeight; y++)
     {
@@ -559,6 +601,8 @@ ERR Gray16Fixed_Gray32Float(PKFormatConverter* pFC, const PKRect* pRect, U8* pb,
     const float fltCvtFactor = 1.0F / (1 << 13);
     I32 y;
 
+    UNREFERENCED_PARAMETER( pFC );
+
     // Stride is assumed to be same for src/dst
     for (y = iHeight - 1; y >= 0; y--)
     {
@@ -580,6 +624,8 @@ ERR Gray32Float_Gray16Fixed(PKFormatConverter* pFC, const PKRect* pRect, U8* pb,
     const I32 iWidth = pRect->Width;
     const float fltCvtFactor = (float) (1 << 13);
     I32 y;
+
+    UNREFERENCED_PARAMETER( pFC );
 
     // Stride is assumed to be same for src/dst
     for (y = 0; y < iHeight; y++)
@@ -603,6 +649,8 @@ ERR RGB48Fixed_RGB96Float(PKFormatConverter* pFC, const PKRect* pRect, U8* pb, U
     const float fltCvtFactor = 1.0F / (1 << 13);
     I32 y;
 
+    UNREFERENCED_PARAMETER( pFC );
+
     // Stride is assumed to be same for src/dst
     for (y = iHeight - 1; y >= 0; y--)
     {
@@ -625,6 +673,8 @@ ERR RGB96Float_RGB48Fixed(PKFormatConverter* pFC, const PKRect* pRect, U8* pb, U
     const float fltCvtFactor = (float)(1 << 13);
     I32 y;
 
+    UNREFERENCED_PARAMETER( pFC );
+
     // Stride is assumed to be same for src/dst
     for (y = 0; y < iHeight; y++)
     {
@@ -646,6 +696,8 @@ ERR RGB64Fixed_RGB96Float(PKFormatConverter* pFC, const PKRect* pRect, U8* pb, U
     const I32 iWidth = pRect->Width;
     const float fltCvtFactor = 1.0F / (1 << 13);
     I32 y;
+
+    UNREFERENCED_PARAMETER( pFC );
 
     // Stride is assumed to be same for src/dst
     for (y = iHeight - 1; y >= 0; y--)
@@ -672,6 +724,8 @@ ERR RGB96Float_RGB64Fixed(PKFormatConverter* pFC, const PKRect* pRect, U8* pb, U
     const I32 iWidth = pRect->Width;
     const float fltCvtFactor = (float)(1 << 13);
     I32 y;
+
+    UNREFERENCED_PARAMETER( pFC );
 
     // Stride is assumed to be same for src/dst
     for (y = 0; y < iHeight; y++)
@@ -700,6 +754,8 @@ ERR RGBA64Fixed_RGBA128Float(PKFormatConverter* pFC, const PKRect* pRect, U8* pb
     const float fltCvtFactor = 1.0F / (1 << 13);
     I32 y;
 
+    UNREFERENCED_PARAMETER( pFC );
+
     // Stride is assumed to be same for src/dst
     for (y = iHeight - 1; y >= 0; y--)
     {
@@ -723,6 +779,8 @@ ERR RGBA128Float_RGBA64Fixed(PKFormatConverter* pFC, const PKRect* pRect, U8* pb
     const float fltCvtFactor = (float)(1 << 13);
     I32 y;
 
+    UNREFERENCED_PARAMETER( pFC );
+
     // Stride is assumed to be same for src/dst
     for (y = 0; y < iHeight; y++)
     {
@@ -744,6 +802,8 @@ ERR RGBE_RGB96Float(PKFormatConverter* pFC, const PKRect* pRect, U8* pb, U32 cbS
     const I32 iHeight = pRect->Height;
     const I32 iWidth = pRect->Width;
     I32 y;
+
+    UNREFERENCED_PARAMETER( pFC );
 
     // Stride is assumed to be same for src/dst
     for (y = iHeight - 1; y >= 0; y--)
@@ -796,6 +856,8 @@ ERR RGB96Float_RGBE(PKFormatConverter* pFC, const PKRect* pRect, U8* pb, U32 cbS
     const I32 iWidth = pRect->Width;
     I32 y;
 
+    UNREFERENCED_PARAMETER( pFC );
+
     assert(iWidth > 2); // Otherwise, we corrupt source data in inner loop
 
     // Stride is assumed to be same for src/dst
@@ -835,7 +897,7 @@ ERR RGB96Float_RGBE(PKFormatConverter* pFC, const PKRect* pRect, U8* pb, U32 cbS
                 piDstPixel[4*x] = (U8)(fltRed * fltScale);       // R
                 piDstPixel[4*x+1] = (U8)(fltGreen * fltScale);   // G
                 piDstPixel[4*x+2] = (U8)(fltBlue * fltScale);    // B
-                piDstPixel[4*x+3] = e + 128;                     // E
+                piDstPixel[4*x+3] = (U8)(e + 128);               // E
             }
         }
     }
@@ -882,7 +944,7 @@ static U16 Convert_Float_To_Half(float f)
 
     if (f != f)
     {
-        return iFloat | HLF_QNaN_BITZS; // +QNaN, -QNaN
+        return (U16)(iFloat | HLF_QNaN_BITZS); // +QNaN, -QNaN
     }
     else if (f < -HLF_MAX)
     {
@@ -903,7 +965,7 @@ static U16 Convert_Float_To_Half(float f)
     const U32 e = (iFloat >> 23) & 0x000000ff;
     const U32 m = (iFloat >>  0) & 0x007fffff;
 
-    return (s << 15) | ((e - 127 + 15) << 10) | (m >> 13);
+    return (U16) ((s << 15) | ((e - 127 + 15) << 10) | (m >> 13));
     }
 }
 
@@ -913,6 +975,8 @@ ERR RGBA64Half_RGBA128Float(PKFormatConverter* pFC, const PKRect* pRect, U8* pb,
     const I32 iHeight = pRect->Height;
     const I32 iWidthX4 = 4 * pRect->Width;
     I32 y;
+
+    UNREFERENCED_PARAMETER( pFC );
 
     // Stride is assumed to be same for src/dst
     for (y = iHeight - 1; y >= 0; y--)
@@ -935,6 +999,8 @@ ERR RGBA128Float_RGBA64Half(PKFormatConverter* pFC, const PKRect* pRect, U8* pb,
     const I32 iWidthX4 = 4 * pRect->Width;
     I32 y;
 
+    UNREFERENCED_PARAMETER( pFC );
+
     // Stride is assumed to be same for src/dst
     for (y = 0; y < iHeight; y++)
     {
@@ -955,6 +1021,8 @@ ERR RGB64Half_RGB96Float(PKFormatConverter* pFC, const PKRect* pRect, U8* pb, U3
     const I32 iHeight = pRect->Height;
     const I32 iWidth = pRect->Width;
     I32 y;
+
+    UNREFERENCED_PARAMETER( pFC );
 
     // Stride is assumed to be same for src/dst
     for (y = iHeight - 1; y >= 0; y--)
@@ -980,6 +1048,8 @@ ERR RGB96Float_RGB64Half(PKFormatConverter* pFC, const PKRect* pRect, U8* pb, U3
     const I32 iHeight = pRect->Height;
     const I32 iWidth = pRect->Width;
     I32 y;
+
+    UNREFERENCED_PARAMETER( pFC );
 
     // Stride is assumed to be same for src/dst
     for (y = 0; y < iHeight; y++)
@@ -1007,6 +1077,8 @@ ERR RGB48Half_RGB96Float(PKFormatConverter* pFC, const PKRect* pRect, U8* pb, U3
     const I32 iWidthX3 = 3*pRect->Width;
     I32 y;
 
+    UNREFERENCED_PARAMETER( pFC );
+
     // Stride is assumed to be same for src/dst
     for (y = iHeight - 1; y >= 0; y--)
     {
@@ -1027,6 +1099,8 @@ ERR RGB96Float_RGB48Half(PKFormatConverter* pFC, const PKRect* pRect, U8* pb, U3
     const I32 iHeight = pRect->Height;
     const I32 iWidthX3 = 3*pRect->Width;
     I32 y;
+
+    UNREFERENCED_PARAMETER( pFC );
 
     // Stride is assumed to be same for src/dst
     for (y = 0; y < iHeight; y++)
@@ -1049,6 +1123,8 @@ ERR Gray16Half_Gray32Float(PKFormatConverter* pFC, const PKRect* pRect, U8* pb, 
     const I32 iWidth = pRect->Width;
     I32 y;
 
+    UNREFERENCED_PARAMETER( pFC );
+
     // Stride is assumed to be same for src/dst
     for (y = iHeight - 1; y >= 0; y--)
     {
@@ -1070,6 +1146,8 @@ ERR Gray32Float_Gray16Half(PKFormatConverter* pFC, const PKRect* pRect, U8* pb, 
     const I32 iWidth = pRect->Width;
     I32 y;
 
+    UNREFERENCED_PARAMETER( pFC );
+
     // Stride is assumed to be same for src/dst
     for (y = 0; y < iHeight; y++)
     {
@@ -1089,6 +1167,8 @@ ERR RGB555_RGB24(PKFormatConverter* pFC, const PKRect* pRect, U8* pb, U32 cbStri
     const I32 iHeight = pRect->Height;
     const I32 iWidth = pRect->Width;
     I32 y;
+
+    UNREFERENCED_PARAMETER( pFC );
 
     // Stride is assumed to be same for src/dst
     for (y = iHeight - 1; y >= 0; y--)
@@ -1120,6 +1200,8 @@ ERR RGB101010_RGB48(PKFormatConverter* pFC, const PKRect* pRect, U8* pb, U32 cbS
     const I32 iWidth = pRect->Width;
     I32 y;
 
+    UNREFERENCED_PARAMETER( pFC );
+
     // Stride is assumed to be same for src/dst
     for (y = iHeight - 1; y >= 0; y--)
     {
@@ -1150,6 +1232,8 @@ ERR RGB24_RGB555(PKFormatConverter* pFC, const PKRect* pRect, U8* pb, U32 cbStri
     const I32 iWidth = pRect->Width;
     I32 y;
 
+    UNREFERENCED_PARAMETER( pFC );
+
     // Stride is assumed to be same for src/dst
     for (y = 0; y < iHeight; y++)
     {
@@ -1163,9 +1247,10 @@ ERR RGB24_RGB555(PKFormatConverter* pFC, const PKRect* pRect, U8* pb, U32 cbStri
             const unsigned int g = piSrcPixel[3*x+1];
             const unsigned int b = piSrcPixel[3*x+2];
 
-            piDstPixel[x] = ((r & 0xF8) << 7) |
+            piDstPixel[x] = (U16) (
+                            ((r & 0xF8) << 7) |
                             ((g & 0xF8) << 2) |
-                             (b >> 3);
+                             (b >> 3));
         }
     }
 
@@ -1179,6 +1264,8 @@ ERR RGB48_RGB101010(PKFormatConverter* pFC, const PKRect* pRect, U8* pb, U32 cbS
     const I32 iHeight = pRect->Height;
     const I32 iWidth = pRect->Width;
     I32 y;
+
+    UNREFERENCED_PARAMETER( pFC );
 
     // Stride is assumed to be same for src/dst
     for (y = 0; y < iHeight; y++)
@@ -1211,6 +1298,8 @@ ERR RGB565_RGB24(PKFormatConverter* pFC, const PKRect* pRect, U8* pb, U32 cbStri
     const I32 iWidth = pRect->Width;
     I32 y;
 
+    UNREFERENCED_PARAMETER( pFC );
+
     // Stride is assumed to be same for src/dst
     for (y = iHeight - 1; y >= 0; y--)
     {
@@ -1242,6 +1331,8 @@ ERR RGB24_RGB565(PKFormatConverter* pFC, const PKRect* pRect, U8* pb, U32 cbStri
     const I32 iWidth = pRect->Width;
     I32 y;
 
+    UNREFERENCED_PARAMETER( pFC );
+
     // Stride is assumed to be same for src/dst
     for (y = 0; y < iHeight; y++)
     {
@@ -1255,9 +1346,10 @@ ERR RGB24_RGB565(PKFormatConverter* pFC, const PKRect* pRect, U8* pb, U32 cbStri
             const unsigned int g = piSrcPixel[3*x+1];
             const unsigned int b = piSrcPixel[3*x+2];
 
-            piDstPixel[x] = ((r & 0xF8) << 8) |
+            piDstPixel[x] = (U16) (
+                            ((r & 0xF8) << 8) |
                             ((g & 0xFC) << 3) |
-                             (b >> 3);
+                             (b >> 3));
         }
     }
 
@@ -1270,6 +1362,8 @@ ERR RGBA32_BGRA32(PKFormatConverter* pFC, const PKRect* pRect, U8* pb, U32 cbStr
     const I32 iHeight = pRect->Height;
     const I32 iWidthX4 = 4 * pRect->Width; // 4 == R, G, B, A
     I32 y;
+
+    UNREFERENCED_PARAMETER( pFC );
 
     for (y = 0; y < iHeight; y++)
     {
@@ -1457,9 +1551,9 @@ Cleanup:
     return err;
 }
 
-const ERR PKFormatConverter_EnumConversions(const PKPixelFormatGUID *pguidSourcePF,
-                                            const U32 iIndex,
-                                            const PKPixelFormatGUID **ppguidTargetPF)
+ERR PKFormatConverter_EnumConversions(const PKPixelFormatGUID *pguidSourcePF,
+                                      const U32 iIndex,
+                                      const PKPixelFormatGUID **ppguidTargetPF)
 {
     U32 iCurrIdx = 0;
     U32 i;
@@ -1519,6 +1613,11 @@ Cleanup:
 
 ERR PKFormatConverter_Convert(PKFormatConverter* pFC, const PKRect* pRect, U8* pb, U32 cbStride)
 {
+    UNREFERENCED_PARAMETER( pFC );
+    UNREFERENCED_PARAMETER( pRect );
+    UNREFERENCED_PARAMETER( pb );
+    UNREFERENCED_PARAMETER( cbStride );
+
     return WMP_errSuccess;
 }
 
@@ -1526,7 +1625,7 @@ ERR PKFormatConverter_Release(PKFormatConverter** ppFC)
 {
     ERR err = WMP_errSuccess;
 
-    Call(PKFree(ppFC));
+    Call(PKFree((void **) ppFC));
 
 Cleanup:
     return err;

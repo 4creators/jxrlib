@@ -36,25 +36,6 @@
 
 #ifndef DISABLE_PERF_MEASUREMENT
 
-//***************************************************************************
-// Data Declarations
-//***************************************************************************
-typedef enum
-{
-    CS_UNINIT,
-    CS_RUNNING,
-    CS_STOPPED,
-} CLOCKSTATE;
-
-typedef struct PERFTIMERSTATE
-{
-    CLOCKSTATE          eState;
-    PERFTIMERTIME       iElapsedTime;
-    clock_t             iPrevStartTime;
-    PERFTIMERTIME       iZeroTimeIntervals;
-} PERFTIMERSTATE;
-
-
 
 //***************************************************************************
 // Private Functions
@@ -74,7 +55,7 @@ Bool AccumulateTime(PERFTIMERSTATE *pState, PERFTIMERTIME *ptAccumulator)
         goto exit;
     }
 
-    iIntervalTime = (iStopTime - pState->iPrevStartTime);
+    iIntervalTime = (iStopTime - (clock_t) pState->iPrevStartTime);
 
     // Check for zero-time interval
     if (0 == iIntervalTime)

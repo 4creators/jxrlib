@@ -25,6 +25,9 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //
 //*@@@---@@@@******************************************************************
+#ifndef ANSI
+#define _CRT_SECURE_NO_WARNINGS
+#endif ANSI
 
 #include <stdlib.h>
 #include <string.h>
@@ -132,12 +135,13 @@ ERR ParseHDRHeader(
     ERR err = WMP_errSuccess;
 
     char txtbuff[512];
+    Bool done = FALSE;
 
     FailIf(NULL == fgets(txtbuff, 12, pWS->state.file.pFile), WMP_errUnsupportedFormat);
     FailIf(0 != strcmp(txtbuff, "#?RADIANCE\n"), WMP_errUnsupportedFormat);
 
     // Read lines to image size
-    while (1) {
+    while (!done) {
         FailIf(NULL == fgets(txtbuff, 512, pWS->state.file.pFile), WMP_errUnsupportedFormat);
 
         if (0 == strncmp(txtbuff, "FORMAT", 6)) {
@@ -145,7 +149,7 @@ ERR ParseHDRHeader(
         }
         if (0 == strncmp(txtbuff, "-Y", 2)) {
             sscanf(txtbuff, "-Y %d +X %d\n", &pID->uHeight, &pID->uWidth);
-            break;
+            done = TRUE;
         }
       }
 
@@ -161,11 +165,11 @@ ERR ParseHDRHeader(
 
     // Set header other header parameters
     pID->guidPixFormat = GUID_PKPixelFormat32bppRGBE;
-    pID->HDR.cbPixel = 4; 
+    pID->EXT.HDR.cbPixel = 4; 
     // Set pointer to first pixel
-    Call(pWS->GetPos(pWS, &pID->HDR.offPixel));
-    pID->HDR.offPixel -= 3;
-    Call(pWS->SetPos(pWS, pID->HDR.offPixel));
+    Call(pWS->GetPos(pWS, &pID->EXT.HDR.offPixel));
+    pID->EXT.HDR.offPixel -= 3;
+    Call(pWS->SetPos(pWS, pID->EXT.HDR.offPixel));
 
     // We don't need: pID->fResX and pID->fResY
 Cleanup:
@@ -195,8 +199,8 @@ ERR PKImageDecode_Copy_HDR(
 
     struct WMPStream* pS = pID->pStream;
 
-    size_t cbLineS = (pID->HDR.cbPixel * pID->uWidth + 3) / 4 * 4;
-    size_t cbLineM = pID->HDR.cbPixel * pRect->Width;
+    size_t cbLineS = (pID->EXT.HDR.cbPixel * pID->uWidth + 3) / 4 * 4;
+    size_t cbLineM = pID->EXT.HDR.cbPixel * pRect->Width;
     
     I32 i = 0;
 
@@ -208,11 +212,11 @@ ERR PKImageDecode_Copy_HDR(
 
     for (i = pRect->Y ; i < pRect->Y + pRect->Height ; i++)
     {
-        size_t offLine = pID->HDR.cbPixel * pRect->X;
+        size_t offLine = pID->EXT.HDR.cbPixel * pRect->X;
         size_t offS = cbLineS * i + offLine;
         size_t offM = cbStride * (i - pRect->Y) + offLine;
 
-        Call(pS->SetPos(pS, pID->HDR.offPixel + offS));
+        Call(pS->SetPos(pS, pID->EXT.HDR.offPixel + offS));
         Call(pS->Read(pS, pb + offM, cbLineM));
     }
 

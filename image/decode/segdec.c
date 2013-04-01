@@ -307,7 +307,7 @@ static Void DecodeCBP(CWMImageStrCodec * pSC, CCodingContext *pContext)
                         iCBPCY |= ((iNumBlockCBP & 0xf) << (iBlock * 4));
                         for (k = 0; k < 2; k ++) {
                             Int iCode = 5;
-                            const iShift[4] = {0, 1, 4, 5};
+                            const Int iShift[4] = {0, 1, 4, 5};
                             if((iNumBlockCBP >> (k + 4)) & 0x01) {
                                 if(_getBool16(pIO)) {
                                     iCode = 1;
@@ -572,8 +572,8 @@ static _FORCEINLINE Int DecodeBlockAdaptive (Bool bNoSkip, Bool bChroma, CAdapti
                                 const Int iModelBits, const Int iTrim, const Int iQP,
                                 const Int *pOrder, const Bool bSkipFlexbits)
 {
-    const Int iLocation = 1;
-    const Int iContextOffset = CTDC + CONTEXTX;
+    // const Int iLocation = 1;
+    // const Int iContextOffset = CTDC + CONTEXTX;
     Int kk, iNumNonzero = 0, iFlex = iModelBits - iTrim;
 
     if (iFlex < 0 || bSkipFlexbits)
@@ -651,6 +651,9 @@ static _FORCEINLINE Int DecodeCoeffs (CWMImageStrCodec * pSC, CCodingContext *pC
     Int iCBPCU = pSC->MBInfo.iCBP[1];
     Int iCBPCV = pSC->MBInfo.iCBP[2];
     Int iCBPCY = pSC->MBInfo.iCBP[0];
+
+    UNREFERENCED_PARAMETER( iMBX );
+    UNREFERENCED_PARAMETER( iMBY );
 
     /** set scan arrays and other MB level constants **/
     if (iOrient == 1) {
@@ -793,6 +796,9 @@ Int DecodeMacroblockLowpass (CWMImageStrCodec * pSC, CCodingContext *pContext,
 #endif
     CWMIMBInfo * pMBInfo = &pSC->MBInfo;
     I32 *aDC[MAX_CHANNELS];
+
+    UNREFERENCED_PARAMETER( iMBX );
+    UNREFERENCED_PARAMETER( iMBYdummy );
 
     readIS_L1(pSC, pIO);
     if((pSC->WMISCP.bfBitstreamFormat != SPATIAL) && (pSC->pTile[pSC->cTileColumn].cBitsLP > 0))  // MB-based LP QP index
@@ -1015,7 +1021,10 @@ Int DecodeMacroblockDC(CWMImageStrCodec * pSC, CCodingContext *pContext, Int iMB
     Int iModelBits = pContext->m_aModelDC.m_iFlcBits[0];
     struct CAdaptiveHuffman *pAH;
     Int iQDCY, iQDCU, iQDCV;
-    const Int iChromaElements = (cf == YUV_420) ? 8 * 8 : ((cf == YUV_422) ? 8 * 16 : 16 * 16);
+    // const Int iChromaElements = (cf == YUV_420) ? 8 * 8 : ((cf == YUV_422) ? 8 * 16 : 16 * 16);
+
+    UNREFERENCED_PARAMETER( iMBX );
+    UNREFERENCED_PARAMETER( iMBY );
 
     for (i = 0; i < iChannels; i++)
         memset (pMBInfo->iBlockDC[i], 0, 16 * sizeof (I32));

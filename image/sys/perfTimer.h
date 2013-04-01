@@ -54,14 +54,14 @@
 #else // DISABLE_PERF_MEASUREMENT
 
 #define PERFTIMER_ONLY(code) code
-#define PERFTIMER_NEW(fPerf, ppPerfTimer)    if (fPerf) {Bool b = PerfTimerNew(ppPerfTimer); assert(b);};
+#define PERFTIMER_NEW(fPerf, ppPerfTimer)    if (fPerf) {Bool b = b = PerfTimerNew(ppPerfTimer); assert(b);};
 #define PERFTIMER_DELETE(fPerf, pPerfTimer)  if (fPerf) {PerfTimerDelete(pPerfTimer);};
-#define PERFTIMER_START(fPerf, pPerfTimer)   if (fPerf) {Bool b = PerfTimerStart(pPerfTimer); assert(b);};
-#define PERFTIMER_STOP(fPerf, pPerfTimer)    if (fPerf) {Bool b = PerfTimerStop(pPerfTimer); assert(b);};
+#define PERFTIMER_START(fPerf, pPerfTimer)   if (fPerf) {Bool b = b = PerfTimerStart(pPerfTimer); assert(b);};
+#define PERFTIMER_STOP(fPerf, pPerfTimer)    if (fPerf) {Bool b = b = PerfTimerStop(pPerfTimer); assert(b);};
 #define PERFTIMER_GETRESULTS(fPerf, pPerfTimer, pResults) \
-    if (fPerf) {Bool b = PerfTimerGetResults((pPerfTimer), (pResults)); assert(b);};
+    if (fPerf) {Bool b = b = PerfTimerGetResults((pPerfTimer), (pResults)); assert(b);};
 #define PERFTIMER_COPYSTARTTIME(fPerf, pDst, pSrc) \
-    if (fPerf) {Bool b = PerfTimerCopyStartTime((pDst), (pSrc)); assert(b);};
+    if (fPerf) {Bool b = b = PerfTimerCopyStartTime((pDst), (pSrc)); assert(b);};
 #define PERFTIMER_REPORT(fPerf, pCodec) \
     if (fPerf) {OutputPerfTimerReport(pCodec);};
 #endif // DISABLE_PERF_MEASUREMENT
@@ -82,15 +82,34 @@ typedef struct PERFTIMERRESULTS
 
 
 //***************************************************************************
+// Data Declarations
+//***************************************************************************
+typedef enum
+{
+    CS_UNINIT,
+    CS_RUNNING,
+    CS_STOPPED,
+} CLOCKSTATE;
+
+typedef struct PERFTIMERSTATE
+{
+    CLOCKSTATE          eState;
+    PERFTIMERTIME       iElapsedTime;
+    PERFTIMERTIME       iPrevStartTime;
+    PERFTIMERTIME       iZeroTimeIntervals;
+} PERFTIMERSTATE;
+
+
+//***************************************************************************
 // Functions and Macros
 //***************************************************************************
-Bool PerfTimerNew(struct PERFTIMERSTATE **ppNewPerfTimer);
-void PerfTimerDelete(struct PERFTIMERSTATE *pThisPerfTimer);
-Bool PerfTimerStart(struct PERFTIMERSTATE *pThisPerfTimer);
-Bool PerfTimerStop(struct PERFTIMERSTATE *pThisPerfTimer);
-Bool PerfTimerGetResults(struct PERFTIMERSTATE *pThisPerfTimer,
+Bool PerfTimerNew(PERFTIMERSTATE **ppNewPerfTimer);
+void PerfTimerDelete(PERFTIMERSTATE *pThisPerfTimer);
+Bool PerfTimerStart(PERFTIMERSTATE *pThisPerfTimer);
+Bool PerfTimerStop(PERFTIMERSTATE *pThisPerfTimer);
+Bool PerfTimerGetResults(PERFTIMERSTATE *pThisPerfTimer,
                          PERFTIMERRESULTS *pPerfTimerResults);
-Bool PerfTimerCopyStartTime(struct PERFTIMERSTATE *pDestPerfTimer,
-                            struct PERFTIMERSTATE *pSrcPerfTimer);
+Bool PerfTimerCopyStartTime(PERFTIMERSTATE *pDestPerfTimer,
+                            PERFTIMERSTATE *pSrcPerfTimer);
 
 #endif // __PERFTIMER_H_

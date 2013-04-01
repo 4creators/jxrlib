@@ -45,6 +45,11 @@ __declspec(naked) void __stdcall RGB24_6(
     size_t cbYCoCg,
     size_t cmb)
 {
+    UNREFERENCED_PARAMETER( pbRGB );
+    UNREFERENCED_PARAMETER( cbRGB );
+    UNREFERENCED_PARAMETER( pbYCoCg );
+    UNREFERENCED_PARAMETER( cbYCoCg );
+    UNREFERENCED_PARAMETER( cmb );
     __asm {
          push ebp
          push ebx
@@ -280,7 +285,7 @@ Int inputMBRow_RGB24_6(CWMImageStrCodec* pSC)
 
     U8* const pbY = (U8*)pSC->p1MBbuffer[0];
     U8* const pbU = (U8*)pSC->p1MBbuffer[1];
-    U8* const pbV = (U8*)pSC->p1MBbuffer[2];
+    // U8* const pbV = (U8*)pSC->p1MBbuffer[2];
 
     const size_t cmbColumn = (pSC->WMII.cWidth + 15) / 16;
 
@@ -376,7 +381,7 @@ void StrEncOpt(CWMImageStrCodec* pSC)
         1)
     {
         CWMImageInfo* pII = &pSC->WMII;
-        CWMIStrCodecParam* pSCP = &pSC->WMISCP;
+        // CWMIStrCodecParam* pSCP = &pSC->WMISCP;
 
         g_const_d1 = _mm_set_epi32(1, 1, 1, 1);
         g_const_d0x400 = _mm_set_epi32(0x400, 0x400, 0x400, 0x400);
@@ -397,6 +402,8 @@ void StrEncOpt(CWMImageStrCodec* pSC)
         }
 
     }
+#else
+    UNREFERENCED_PARAMETER( pSC );
 #endif    
 }
 

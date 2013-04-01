@@ -123,6 +123,9 @@ Int EncodeMacroblockDC (CWMImageStrCodec *pSC, CCodingContext *pContext, Int iMB
     COLORFORMAT cf = pSC->m_param.cfColorFormat;
     const Int iChannels = (Int) pSC->m_param.cNumChannels;
 
+    UNREFERENCED_PARAMETER( iMBX );
+    UNREFERENCED_PARAMETER( iMBY );
+
     writeIS_L1(pSC, pIO);
 
     if(pSC->m_param.bTranscode == FALSE){
@@ -478,7 +481,7 @@ Int EncodeMacroblockLowpass (CWMImageStrCodec *pSC, CCodingContext *pContext, In
     BitIOInfo* pIO = pContext->m_pIOLP;
 
     CAdaptiveScan *pScan = pContext->m_aScanLowpass;
-    Int  k, iPrevRun = -1, iRun = 0, iLastIndex = 0;
+    Int  k, /*iPrevRun = -1,*/ iRun = 0;// iLastIndex = 0;
     Int iModelBits = pContext->m_aModelLP.m_iFlcBits[0];
     PixelI aBuf[2][8];
     Int aLaplacianMean[2] = {0, 0}, *pLM = aLaplacianMean;
@@ -487,6 +490,9 @@ Int EncodeMacroblockLowpass (CWMImageStrCodec *pSC, CCodingContext *pContext, In
     const I32 *aDC[MAX_CHANNELS];
     Int aResidual[MAX_CHANNELS][16];
     Void (*putBits)(BitIOInfo* pIO, U32 uiBits, U32 cBits) = putBit16;
+
+    UNREFERENCED_PARAMETER( iMBX );
+    UNREFERENCED_PARAMETER( iMBY );
 
     if (iChannels > MAX_CHANNELS)
         return ICERR_ERROR;
@@ -731,8 +737,10 @@ __forceinline
 static Void EncodeFirstIndex (Bool bChroma, Int iLoc, Int iCont, Int iIndex, Int iSign,
                   struct CAdaptiveHuffman **ppAHexpt, BitIOInfo* pOut)
 {
-    Int iContext = iCont + 1 + bChroma * 3;
+    // Int iContext = iCont + 1 + bChroma * 3;
     struct CAdaptiveHuffman *pAHexpt = ppAHexpt[bChroma * 3];
+    UNREFERENCED_PARAMETER( iLoc );
+    UNREFERENCED_PARAMETER( iCont );
     pAHexpt->m_iDiscriminant += pAHexpt->m_pDelta[iIndex];
     pAHexpt->m_iDiscriminant1 += pAHexpt->m_pDelta1[iIndex];
     putBit16z(pOut, pAHexpt->m_pTable[iIndex * 2 + 1] * 2 + iSign, pAHexpt->m_pTable[iIndex * 2 + 2] + 1);
@@ -754,8 +762,8 @@ static Void EncodeIndex (Bool bChroma, Int iLoc, Int iCont, Int iIndex, Int  iSi
         putBit16z(pOut, pAHexpt->m_pTable[iIndex * 2 + 1] * 2 + iSign, pAHexpt->m_pTable[iIndex * 2 + 2] + 1);
     }
     else if (iLoc == 15) {
-        static const gCode[] = { 0, 6, 2, 7 };
-        static const gLen[] = { 1, 3, 2, 3 };
+        static const U32 gCode[] = { 0, 6, 2, 7 };
+        static const U32 gLen[] = { 1, 3, 2, 3 };
         putBit16z(pOut, gCode[iIndex] * 2 + iSign, gLen[iIndex] + 1);
         return;
     }
@@ -848,6 +856,9 @@ static Int CodeCoeffs (CWMImageStrCodec * pSC, CCodingContext *pContext,
     Int aLaplacianMean[2] = { 0, 0}, *pLM = aLaplacianMean;
     Bool bChroma = FALSE;
 
+    UNREFERENCED_PARAMETER( iMBX );
+    UNREFERENCED_PARAMETER( iMBY );
+
     assert (iModelBits < 16);
     if (pContext->m_iTrimFlexBits <= iModelBits && pSC->WMISCP.sbSubband != SB_NO_FLEXBITS) {
         iTrim = pContext->m_iTrimFlexBits;
@@ -885,7 +896,7 @@ static Int CodeCoeffs (CWMImageStrCodec * pSC, CCodingContext *pContext,
                 writeIS_L2(pSC, pIOFL);
             
             for (iSubblock = 0; iSubblock < 4; iSubblock++, iPattern >>= 1, iIndex ++) {
-                const PixelI *pCoeffs;
+                const PixelI *pCoeffs = NULL;
 
                 if(iBlock < 4){
                     pCoeffs = pSC->pPlane[i] + blkOffset[iIndex];
@@ -969,7 +980,10 @@ static Void CodeCBP (CWMImageStrCodec * pSC, CCodingContext *pContext,
     static const Int aTabLen[] =  { 0, 2, 2, 2, 2, 2, 3, 2, 2, 3, 3, 2, 3, 2, 2, 0 };
     static const Int aTabCode[] = { 0, 0, 1, 0, 2, 1, 4, 3, 3, 5, 6, 2, 7, 1, 0, 0 };
     CAdaptiveHuffman *pAH;
-    Int iCount, iPattern, iCode, iCodeU, iCodeV;
+    Int iCount, iPattern, iCode, iCodeU = 0, iCodeV = 0;
+
+    UNREFERENCED_PARAMETER( iMBX );
+    UNREFERENCED_PARAMETER( iMBY );
 
     predCBPEnc(pSC, pContext);
     writeIS_L1(pSC, pIO);

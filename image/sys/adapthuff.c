@@ -26,12 +26,7 @@
 //
 //*@@@---@@@@******************************************************************
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <math.h>
-
-#include "windowsmediaphoto.h"
-#include "common.h"
+#include "strcodec.h"
 
 #ifdef MEM_TRACE
 #define TRACE_MALLOC    1
@@ -140,6 +135,9 @@ Void Clean (CAdaptiveHuffman *pAdHuff)
 CAdaptiveHuffman *Allocate (Int iNSymbols, CODINGMODE cm)
 {
     CAdaptiveHuffman *pAdHuff = (CAdaptiveHuffman *) malloc (sizeof (CAdaptiveHuffman));
+
+    UNREFERENCED_PARAMETER(cm);
+
     if (pAdHuff == NULL)
         return NULL;
     if (iNSymbols > 255 || iNSymbols <= 0)

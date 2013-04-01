@@ -27,7 +27,7 @@
 //*@@@---@@@@******************************************************************
 
 #include "strcodec.h"
-#include "xplatform_image.h"
+// #include "xplatform_image.h"
 
 #ifdef MEM_TRACE
 #define TRACE_MALLOC    1

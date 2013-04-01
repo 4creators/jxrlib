@@ -284,11 +284,13 @@ extern "C" {
 /* useful PFD related macros */
 #define __possibly_notnulltermiated         __post __$possibly_notnulltermiated
 
+#if defined(_WINDOWS_)
 /* Windows Internal */
 #define __volatile                          __$volatile
 #define __nonvolatile                       __$nonvolatile
 #define __deref_volatile                    __deref __volatile
 #define __deref_nonvolatile                 __deref __nonvolatile
+#endif
 
 /* declare stub functions for macros */
 __inner_assume_validated_dec 

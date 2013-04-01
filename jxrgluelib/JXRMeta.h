@@ -32,6 +32,10 @@
 #include <wmspecstring.h>
 #endif
 
+#ifndef UNREFERENCED_PARAMETER
+#define UNREFERENCED_PARAMETER(P) { (P) = (P); }
+#endif UNREFERENCED_PARAMETER
+
 //================================================================
 // Container
 //================================================================
@@ -132,7 +136,7 @@ typedef struct DPKPROPVARIANT
         char *pszVal;   // DPKVT_LPSTR
         U16 *pwszVal;   // DPKVT_LPWSTR
         U8 *pbVal;      // DPKVT_BYREF | DPKVT_UI1
-    };
+    } VT;
 } DPKPROPVARIANT;
 
 typedef struct DESCRIPTIVEMETADATA
@@ -158,11 +162,7 @@ typedef struct tagWmpDE
     U16 uTag;
     U16 uType;
     U32 uCount;
-    union 
-    {
-        U32 uValueOrOffset;
-        float f32;
-    };
+    U32 uValueOrOffset;
 } WmpDE;
 
 typedef struct tagWmpDEMisc

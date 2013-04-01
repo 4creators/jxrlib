@@ -110,7 +110,7 @@ Void predMacroblockEnc(CWMImageStrCodec * pSC)
 {
     const COLORFORMAT cf = pSC->m_param.cfColorFormat;
     const Int iChannels = (cf == YUV_420 || cf == YUV_422) ? 1 : (Int) pSC->m_param.cNumChannels;
-    size_t mbX = pSC->cColumn - 1, mbY = pSC->cRow - 1;
+    size_t mbX = pSC->cColumn - 1;// mbY = pSC->cRow - 1;
     CWMIMBInfo *pMBInfo = &(pSC->MBInfo);
     Int iDCACPredMode = getDCACPredMode(pSC, mbX);
     Int iDCPredMode = (iDCACPredMode & 0x3);
@@ -296,6 +296,8 @@ static Int predCBPCEnc(CWMImageStrCodec *pSC, Int iCBP, size_t mbX, size_t mbY, 
     Int iPredCBP = 0, iRetval = 0;
     Int iNOrig = NumOnes(iCBP), iNDiff = AVG_NDIFF;//NumOnes(iPredCBP ^ iCBP);
 
+    UNREFERENCED_PARAMETER( mbY );
+
     /* only top left block pattern is predicted from neighbour */
     if(pSC->m_bCtxLeft) {
         if (pSC->m_bCtxTop) {
@@ -356,6 +358,8 @@ static Int predCBPC420Enc(CWMImageStrCodec *pSC, Int iCBP, size_t mbX, size_t mb
     Int iPredCBP = 0, iRetval = 0;
     Int iNOrig = NumOnes(iCBP) * 4, iNDiff = AVG_NDIFF;//NumOnes(iPredCBP ^ iCBP);
 
+    UNREFERENCED_PARAMETER( mbY );
+
     /* only top left block pattern is predicted from neighbour */
     if(pSC->m_bCtxLeft) {
         if (pSC->m_bCtxTop) {
@@ -411,6 +415,8 @@ static Int predCBPC422Enc(CWMImageStrCodec *pSC, Int iCBP, size_t mbX, size_t mb
 {
     Int iPredCBP = 0, iRetval = 0;
     Int iNOrig = NumOnes(iCBP) * 2, iNDiff = AVG_NDIFF;//NumOnes(iPredCBP ^ iCBP);
+
+    UNREFERENCED_PARAMETER( mbY );
 
     /* only top left block pattern is predicted from neighbour */
     if(pSC->m_bCtxLeft) {

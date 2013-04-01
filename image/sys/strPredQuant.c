@@ -125,12 +125,13 @@ Void remapQP(CWMIQuantizer * pQP, I32 iShift, Bool bScaledArith)
 Int allocatePredInfo(CWMImageStrCodec *pSC)
 {
     size_t i, j;
-    COLORFORMAT cf = pSC->m_param.cfColorFormat;
+    // COLORFORMAT cf = pSC->m_param.cfColorFormat;
     const size_t mbWidth = pSC->cmbWidth;
     const size_t iChannels = pSC->m_param.cNumChannels;
     CWMIPredInfo* pMemory;
+    Bool b32Bit = sizeof(size_t) == 4;
     
-    if(sizeof(size_t) == 4) // integer overlow/underflow check for 32-bit system
+    if(b32Bit) // integer overlow/underflow check for 32-bit system
         if(((mbWidth >> 16) * iChannels * 2 * sizeof(CWMIPredInfo)) & 0xffff0000)
             return ICERR_ERROR;    
     pMemory = (CWMIPredInfo *)malloc(mbWidth * iChannels * 2 * sizeof(CWMIPredInfo));

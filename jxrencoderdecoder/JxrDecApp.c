@@ -75,8 +75,8 @@ typedef struct tagWMPDECAPPARGS
 void WmpDecAppUsage(const char* szExe)
 {
     printf(CRLF);
-    printf("Windows Media Photo Decoder Utility" CRLF);
-    printf("Copyright 2012 Microsoft Corporation - All Rights Reserved" CRLF); 
+    printf("JPEG XR Decoder Utility" CRLF);
+    printf("Copyright 2013 Microsoft Corporation - All Rights Reserved" CRLF); 
     printf(CRLF);
     printf("%s [options]..." CRLF, szExe);
     printf(CRLF);
@@ -235,7 +235,7 @@ ERR WmpDecAppParseArgs(int argc, char* argv[], WMPDECAPPARGS* args)
     ERR err = WMP_errSuccess;
 
     int c = 0, i = 1;
-    char* arg = NULL;
+    // char* arg = NULL;
 
     static const PKPixelFormatGUID* pixelFormat[] =
     {
@@ -412,6 +412,8 @@ ERR WmpDecAppCreateEncoderFromExt(
 {
     ERR err = WMP_errSuccess;
     const PKIID* pIID = NULL;
+
+    UNREFERENCED_PARAMETER( pCFactory );
 
     // get encod PKIID
     Call(GetTestEncodeIID(szExt, &pIID));

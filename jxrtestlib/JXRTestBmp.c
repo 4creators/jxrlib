@@ -93,8 +93,11 @@ ERR WriteBMPHeader(
     U32 i = 0;
 
     struct WMPStream* pS = pIE->pStream;
-    BITMAPFILEHEADER bmpFH = {"BM", 0, };
+    BITMAPFILEHEADER bmpFH = { 0, };
     BITMAPINFOHEADER bmpIH = {sizeof(bmpIH), 0, };
+
+    bmpFH.szBM[0] = 'B';
+    bmpFH.szBM[1] = 'M';
 
     if (IsEqualGUID(&GUID_PKPixelFormat24bppRGB, &pIE->guidPixFormat) || IsEqualGUID(&GUID_PKPixelFormat24bppBGR, &pIE->guidPixFormat))
     {
@@ -253,7 +256,7 @@ ERR ParseBMPHeader(
     U32 i = 0;
 
     Call(pWS->Read(pWS, &bmpFH, sizeof(bmpFH)));
-    FailIf(bmpFH.szBM != strstr(bmpFH.szBM, "BM"), WMP_errUnsupportedFormat);
+    FailIf(bmpFH.szBM != (U8 *) strstr((char *) bmpFH.szBM, "BM"), WMP_errUnsupportedFormat);
 
     Call(pWS->Read(pWS, &bmpIH, sizeof(bmpIH)));
 
@@ -274,7 +277,7 @@ ERR ParseBMPHeader(
             }
             
             pID->guidPixFormat = GUID_PKPixelFormat8bppGray;
-            pID->BMP.cbPixel = 1;
+            pID->EXT.BMP.cbPixel = 1;
             break;
 
         case 16:
@@ -292,12 +295,12 @@ ERR ParseBMPHeader(
                 Call(WMP_errUnsupportedFormat);
             }
 */
-            pID->BMP.cbPixel = 2;
+            pID->EXT.BMP.cbPixel = 2;
             break;
             
         case 24:
             pID->guidPixFormat = GUID_PKPixelFormat24bppBGR;
-            pID->BMP.cbPixel = 3;
+            pID->EXT.BMP.cbPixel = 3;
             break;
 
         case 32:
@@ -312,7 +315,7 @@ ERR ParseBMPHeader(
             }
 */
 //            pID->guidPixFormat = GUID_PKPixelFormat32bppBGRA;
-            pID->BMP.cbPixel = 4;
+            pID->EXT.BMP.cbPixel = 4;
             break;
             
         default:
@@ -326,7 +329,7 @@ ERR ParseBMPHeader(
     pID->fResX = (0 == bmpIH.iPelsPerMeterX ? 96 : (Float)(bmpIH.iPelsPerMeterX * .0254));
     pID->fResY = (0 == bmpIH.iPelsPerMeterY ? 96 : (Float)(bmpIH.iPelsPerMeterY * .0254));
     
-    pID->BMP.offPixel = pID->offStart + bmpFH.uOffBits;
+    pID->EXT.BMP.offPixel = pID->offStart + bmpFH.uOffBits;
 
 Cleanup:
     return err;
@@ -355,8 +358,8 @@ ERR PKImageDecode_Copy_BMP(
 
     struct WMPStream* pS = pID->pStream;
 
-    size_t cbLineS = (pID->BMP.cbPixel * pID->uWidth + 3) / 4 * 4;
-    size_t cbLineM = pID->BMP.cbPixel * pRect->Width;
+    size_t cbLineS = (pID->EXT.BMP.cbPixel * pID->uWidth + 3) / 4 * 4;
+    size_t cbLineM = pID->EXT.BMP.cbPixel * pRect->Width;
     
     I32 i = 0;
 
@@ -368,11 +371,11 @@ ERR PKImageDecode_Copy_BMP(
 
     for (i = pRect->Y + pRect->Height - 1; pRect->Y <= i; --i)
     {
-        size_t offLine = pID->BMP.cbPixel * pRect->X;
+        size_t offLine = pID->EXT.BMP.cbPixel * pRect->X;
         size_t offS = cbLineS * (pID->uHeight - i - 1) + offLine;
         size_t offM = cbStride * (i - pRect->Y) + offLine;
 
-        Call(pS->SetPos(pS, pID->BMP.offPixel + offS));
+        Call(pS->SetPos(pS, pID->EXT.BMP.offPixel + offS));
         Call(pS->Read(pS, pb + offM, cbLineM));
     }
 

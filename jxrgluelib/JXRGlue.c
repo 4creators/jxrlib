@@ -335,7 +335,7 @@ ERR PKCreateFactory_CreateStream(PKStream** ppStream)
 {
     ERR err = WMP_errSuccess;
 
-    Call(PKAlloc(ppStream, sizeof(**ppStream)));
+    Call(PKAlloc((void **) ppStream, sizeof(**ppStream)));
 
 Cleanup:
     return err;
@@ -345,7 +345,7 @@ ERR PKCreateFactory_Release(PKFactory** ppFactory)
 {
     ERR err = WMP_errSuccess;
 
-    Call(PKFree(ppFactory));
+    Call(PKFree((void **) ppFactory));
 
 Cleanup: 
     return err;
@@ -357,7 +357,9 @@ ERR PKCreateFactory(PKFactory** ppFactory, U32 uVersion)
     ERR err = WMP_errSuccess;
     PKFactory* pFactory = NULL;
 
-    Call(PKAlloc(ppFactory, sizeof(**ppFactory)));
+    UNREFERENCED_PARAMETER( uVersion );
+
+    Call(PKAlloc((void **) ppFactory, sizeof(**ppFactory)));
     pFactory = *ppFactory;
 
     pFactory->CreateStream = PKCreateFactory_CreateStream;
@@ -401,7 +403,7 @@ ERR PKCodecFactory_CreateDecoderFromFile(const char* szFilename, PKImageDecode**
     ERR err = WMP_errSuccess;
 
     char *pExt = NULL;
-    PKIID* pIID = NULL;
+    const PKIID* pIID = NULL;
 
     struct WMPStream* pStream = NULL;
     PKImageDecode* pDecoder = NULL;
@@ -417,7 +419,7 @@ ERR PKCodecFactory_CreateDecoderFromFile(const char* szFilename, PKImageDecode**
     Call(CreateWS_File(&pStream, szFilename, "rb"));
 
     // Create decoder
-    Call(PKCodecFactory_CreateCodec(pIID, ppDecoder));
+    Call(PKCodecFactory_CreateCodec(pIID, (void **) ppDecoder));
     pDecoder = *ppDecoder;
 
     // attach stream to decoder
@@ -433,7 +435,7 @@ ERR PKCodecFactory_CreateFormatConverter(PKFormatConverter** ppFConverter)
     ERR err = WMP_errSuccess;
     PKFormatConverter* pFC = NULL;
 
-    Call(PKAlloc(ppFConverter, sizeof(**ppFConverter)));
+    Call(PKAlloc((void **) ppFConverter, sizeof(**ppFConverter)));
     pFC = *ppFConverter;
 
     pFC->Initialize = PKFormatConverter_Initialize;
@@ -454,7 +456,7 @@ ERR PKCreateCodecFactory_Release(PKCodecFactory** ppCFactory)
 {
     ERR err = WMP_errSuccess;
 
-    Call(PKFree(ppCFactory));
+    Call(PKFree((void **) ppCFactory));
 
 Cleanup:
     return err;
@@ -465,7 +467,9 @@ ERR PKCreateCodecFactory(PKCodecFactory** ppCFactory, U32 uVersion)
     ERR err = WMP_errSuccess;
     PKCodecFactory* pCFactory = NULL;
 
-    Call(PKAlloc(ppCFactory, sizeof(**ppCFactory)));
+    UNREFERENCED_PARAMETER( uVersion );
+
+    Call(PKAlloc((void **) ppCFactory, sizeof(**ppCFactory)));
     pCFactory = *ppCFactory;
 
     pCFactory->CreateCodec = PKCodecFactory_CreateCodec;
@@ -489,6 +493,10 @@ ERR PKImageEncode_Initialize(
 {
     ERR err = WMP_errSuccess;
 
+    UNREFERENCED_PARAMETER( pIE );
+    UNREFERENCED_PARAMETER( pvParam );
+    UNREFERENCED_PARAMETER( cbParam );
+
     pIE->pStream = pStream;
     pIE->guidPixFormat = GUID_PKPixelFormatDontCare;
     pIE->fResX = 96;
@@ -504,6 +512,7 @@ Cleanup:
 ERR PKImageEncode_Terminate(
     PKImageEncode* pIE)
 {
+    UNREFERENCED_PARAMETER( pIE );
     return WMP_errSuccess;
 }
 
@@ -544,12 +553,17 @@ ERR PKImageEncode_SetColorContext(PKImageEncode *pIE,
                                   const U8 *pbColorContext,
                                   U32 cbColorContext)
 {
+    UNREFERENCED_PARAMETER( pIE );
+    UNREFERENCED_PARAMETER( pbColorContext );
+    UNREFERENCED_PARAMETER( cbColorContext );
     return WMP_errNotYetImplemented;
 }
 
 
 ERR PKImageEncode_SetDescriptiveMetadata(PKImageEncode *pIE, const DESCRIPTIVEMETADATA *pDescMetadata)
 {
+    UNREFERENCED_PARAMETER( pIE );
+    UNREFERENCED_PARAMETER( pDescMetadata );
     return WMP_errNotYetImplemented;
 }
 
@@ -559,6 +573,10 @@ ERR PKImageEncode_WritePixels(
     U8* pbPixels,
     U32 cbStride)
 {
+    UNREFERENCED_PARAMETER( pIE );
+    UNREFERENCED_PARAMETER( cLine );
+    UNREFERENCED_PARAMETER( pbPixels );
+    UNREFERENCED_PARAMETER( cbStride );
     return WMP_errAbstractMethod;
 }
 
@@ -581,7 +599,7 @@ ERR PKImageEncode_WriteSource(
 
     U8* pb = NULL;
 
-	CWMTranscodingParam* pParam = NULL; 
+	// CWMTranscodingParam* pParam = NULL; 
 
     // get pixel format
     Call(pFC->GetSourcePixelFormat(pFC, &enPFFrom));
@@ -612,29 +630,37 @@ ERR PKImageEncode_WriteSource(
     cbStride = max(cbStrideFrom, cbStrideTo);
 
     // actual dec/enc with local buffer
-    Call(PKAllocAligned(&pb, cbStride * pRect->Height, 128));
+    Call(PKAllocAligned((void **) &pb, cbStride * pRect->Height, 128));
 
     Call(pFC->Copy(pFC, pRect, pb, cbStride));
 
 	Call(pIE->WritePixels(pIE, pRect->Height, pb, cbStride));
 
 Cleanup:
-    PKFreeAligned(&pb);
+    PKFreeAligned((void **) &pb);
     return err;
 }
 
 ERR PKImageEncode_WritePixelsBandedBegin(PKImageEncode* pEncoder, struct WMPStream *pPATempFile)
 {
+    UNREFERENCED_PARAMETER( pEncoder );
+    UNREFERENCED_PARAMETER( pPATempFile );
     return WMP_errAbstractMethod;
 }
 
 ERR PKImageEncode_WritePixelsBanded(PKImageEncode* pEncoder, U32 cLines, U8* pbPixels, U32 cbStride, Bool fLastCall)
 {
+    UNREFERENCED_PARAMETER( pEncoder );
+    UNREFERENCED_PARAMETER( cLines );
+    UNREFERENCED_PARAMETER( pbPixels );
+    UNREFERENCED_PARAMETER( cbStride );
+    UNREFERENCED_PARAMETER( fLastCall );
     return WMP_errAbstractMethod;
 }
 
 ERR PKImageEncode_WritePixelsBandedEnd(PKImageEncode* pEncoder)
 {
+    UNREFERENCED_PARAMETER( pEncoder );
     return WMP_errAbstractMethod;
 }
 
@@ -705,13 +731,13 @@ ERR PKImageEncode_Transcode(
 	else 
 	{
 		// actual dec/enc with local buffer
-	    Call(PKAllocAligned(&pb, cbStride * pRect->Height, 128));
+	    Call(PKAllocAligned((void **) &pb, cbStride * pRect->Height, 128));
 		Call(pFC->Copy(pFC, pRect, pb, cbStride));
 		Call(pIE->WritePixels(pIE, pRect->Height, pb, cbStride));
 	}
 
 Cleanup:
-    PKFreeAligned(&pb);
+    PKFreeAligned((void **) &pb);
     return err;
 }
 
@@ -720,6 +746,9 @@ ERR PKImageEncode_CreateNewFrame(
     void* pvParam,
     size_t cbParam)
 {
+    UNREFERENCED_PARAMETER( pIE );
+    UNREFERENCED_PARAMETER( pvParam );
+    UNREFERENCED_PARAMETER( cbParam );
     // NYI
     return WMP_errSuccess;
 }
@@ -730,7 +759,7 @@ ERR PKImageEncode_Release(
     PKImageEncode *pIE = *ppIE;
     pIE->pStream->Close(&pIE->pStream);
 
-    return PKFree(ppIE);
+    return PKFree((void **) ppIE);
 }
 
 ERR PKImageEncode_Create(PKImageEncode** ppIE)
@@ -738,7 +767,7 @@ ERR PKImageEncode_Create(PKImageEncode** ppIE)
     ERR err = WMP_errSuccess;
     PKImageEncode* pIE = NULL;
 
-    Call(PKAlloc(ppIE, sizeof(**ppIE)));
+    Call(PKAlloc((void **) ppIE, sizeof(**ppIE)));
 
     pIE = *ppIE;
     pIE->Initialize = PKImageEncode_Initialize;
@@ -820,12 +849,16 @@ ERR PKImageDecode_GetResolution(
 
 ERR PKImageDecode_GetColorContext(PKImageDecode *pID, U8 *pbColorContext, U32 *pcbColorContext)
 {
-    *pcbColorContext = 0; // Required arg - so go ahead and crash if NULL
+    UNREFERENCED_PARAMETER( pID );
+    UNREFERENCED_PARAMETER( pbColorContext );
+    UNREFERENCED_PARAMETER( pcbColorContext );
     return WMP_errNotYetImplemented;
 }
 
 ERR PKImageDecode_GetDescriptiveMetadata(PKImageDecode *pIE, DESCRIPTIVEMETADATA *pDescMetadata)
 {
+    UNREFERENCED_PARAMETER( pIE );
+    UNREFERENCED_PARAMETER( pDescMetadata );
     return WMP_errNotYetImplemented;
 }
 
@@ -835,6 +868,10 @@ ERR PKImageDecode_Copy(
     U8* pb,
     U32 cbStride)
 {
+    UNREFERENCED_PARAMETER( pID );
+    UNREFERENCED_PARAMETER( pRect );
+    UNREFERENCED_PARAMETER( pb );
+    UNREFERENCED_PARAMETER( cbStride );
     return WMP_errAbstractMethod;
 }
 
@@ -851,6 +888,8 @@ ERR PKImageDecode_SelectFrame(
     PKImageDecode* pID,
     U32 uFrame)
 {
+    UNREFERENCED_PARAMETER( pID );
+    UNREFERENCED_PARAMETER( uFrame );
     // NYI
     return WMP_errSuccess;
 }
@@ -862,7 +901,7 @@ ERR PKImageDecode_Release(
 
     pID->fStreamOwner && pID->pStream->Close(&pID->pStream);
 
-    return PKFree(ppID);
+    return PKFree((void **) ppID);
 }
 
 ERR PKImageDecode_Create(
@@ -871,7 +910,7 @@ ERR PKImageDecode_Create(
     ERR err = WMP_errSuccess;
     PKImageDecode* pID = NULL;
 
-    Call(PKAlloc(ppID, sizeof(**ppID)));
+    Call(PKAlloc((void **) ppID, sizeof(**ppID)));
 
     pID = *ppID;
     pID->Initialize = PKImageDecode_Initialize;

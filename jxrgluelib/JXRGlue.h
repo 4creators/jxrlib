@@ -39,11 +39,13 @@ extern "C" {
 #define PK_SDK_VERSION 0x0101
 
 #define sizeof2(array) (sizeof(array)/sizeof(*(array)))
-#ifdef __ANSI__
-#ifndef __cplusplus
+#ifndef max
 #define max(a,b) ((a) > (b) ? (a) : (b))
+#endif
+#ifndef min
 #define min(b,a) ((a) < (b) ? (a) : (b))
 #endif
+#ifdef __ANSI__
 //#define STRCPY_SAFE(pszDest, cbDest, pszSrc)    (strcpy((pszDest), (pszSrc)) == (pszDest) ? 0 : 1)
 #define STRCPY_SAFE(pszDest, cbDest, pszSrc)    (strlcpy((pszDest), (pszSrc), (cbDest)) < (cbDest) ? 0 : 1) // Macintosh impl, not ANSI
 #else
@@ -297,6 +299,11 @@ ERR GetImageDecodeIID(const char* szExt, const PKIID** ppIID);
 
 //================================================================
 #ifdef __ANSI__
+struct tagPKFactory;
+struct tagPKCodecFactory;
+struct tagPKImageDecode;
+struct tagPKImageEncode;
+struct tagPKFormatConverter;
 #define PKFactory           struct tagPKFactory
 #define PKCodecFactory      struct tagPKCodecFactory
 #define PKImageDecode       struct tagPKImageDecode
@@ -612,9 +619,9 @@ ERR PKFormatConverter_Convert(PKFormatConverter* pFC, const PKRect* pRect, U8* p
 ERR PKFormatConverter_Release(PKFormatConverter** ppFC);
 
 // Think of this as static member of PKFormatConverter "class"
-const ERR PKFormatConverter_EnumConversions(const PKPixelFormatGUID *pguidSourcePF,
-                                            const U32 iIndex,
-                                            const PKPixelFormatGUID **ppguidTargetPF);
+ERR PKFormatConverter_EnumConversions(const PKPixelFormatGUID *pguidSourcePF,
+                                      const U32 iIndex,
+                                      const PKPixelFormatGUID **ppguidTargetPF);
 
 ERR PKCodecFactory_CreateFormatConverter(PKFormatConverter** ppFConverter);
 

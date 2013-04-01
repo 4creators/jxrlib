@@ -52,6 +52,11 @@ __declspec(naked) void __stdcall storeRGB24_5(
     size_t cmb)
 {
 #define DISP 8
+    UNREFERENCED_PARAMETER( pbYCoCg );
+    UNREFERENCED_PARAMETER( cbYCoCg );
+    UNREFERENCED_PARAMETER( pbRGB );
+    UNREFERENCED_PARAMETER( cbRGB );
+    UNREFERENCED_PARAMETER( cmb );
     __asm {
         push ebp
         push ebx    
@@ -425,7 +430,7 @@ Int outputMBRow_RGB24_Lossless_1(CWMImageStrCodec* pSC)
 
     U8* const pbY = (U8*)pSC->a0MBbuffer[0];
     U8* const pbU = (U8*)pSC->a0MBbuffer[1];
-    U8* const pbV = (U8*)pSC->a0MBbuffer[2];
+    // U8* const pbV = (U8*)pSC->a0MBbuffer[2];
 
     const size_t cmbColumn = (pSC->WMII.cWidth + 15) / 16;
 
@@ -454,6 +459,12 @@ __declspec(naked) void __stdcall storeRGB24_3(
     size_t cmb,
     const U8* Shift)
 {
+    UNREFERENCED_PARAMETER( pbYCoCg );
+    UNREFERENCED_PARAMETER( cbYCoCg );
+    UNREFERENCED_PARAMETER( pbRGB );
+    UNREFERENCED_PARAMETER( cbRGB );
+    UNREFERENCED_PARAMETER( cmb );
+    UNREFERENCED_PARAMETER( Shift );
     __asm {
         push ebp
         push ebx    
@@ -1046,7 +1057,7 @@ Int outputMBRow_RGB24_Lossy_3(CWMImageStrCodec* pSC)
 
     U8* const pbY = (U8*)pSC->a0MBbuffer[0];
     U8* const pbU = (U8*)pSC->a0MBbuffer[1];
-    U8* const pbV = (U8*)pSC->a0MBbuffer[2];
+    // U8* const pbV = (U8*)pSC->a0MBbuffer[2];
 
     const size_t cmbColumn = (pSC->WMII.cWidth + 15) / 16;
 
@@ -1252,6 +1263,8 @@ Void strIDCT4x4Stage1_OPT5(PixelI* p0, PixelI* p1)
 //================================
 __declspec(naked) void __stdcall strPost4x4Stage1_alternate_ASM5(PixelI* p0, PixelI* p1)
 {
+    UNREFERENCED_PARAMETER( p0 );
+    UNREFERENCED_PARAMETER( p1 );
     __asm {
         push ebp
         push ebx
@@ -1555,7 +1568,7 @@ void StrDecOpt(CWMImageStrCodec* pSC)
     if (IsProcessorFeaturePresent(PF_XMMI64_INSTRUCTIONS_AVAILABLE))
     {
         CWMImageInfo* pII = &pSC->WMII;
-        CWMIStrCodecParam* pSCP = &pSC->WMISCP;
+        // CWMIStrCodecParam* pSCP = &pSC->WMISCP;
 
         g_const_d0 = _mm_setzero_si128();
         g_const_d3 = _mm_set1_epi32(3);
@@ -1604,6 +1617,8 @@ void StrDecOpt(CWMImageStrCodec* pSC)
         }
 
     }
+#else
+    UNREFERENCED_PARAMETER( pSC );
 #endif    
 }
 

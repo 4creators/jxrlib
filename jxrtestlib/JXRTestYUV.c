@@ -41,7 +41,7 @@ ERR WriteIYUVHeader(
     PKImageEncode* pIE)
 {
     ERR err = WMP_errSuccess;
-    struct WMPStream* pS = pIE->pStream;
+    // struct WMPStream* pS = pIE->pStream;
 
     pIE->offPixel = 0;
 
@@ -59,7 +59,7 @@ ERR WriteYUV422Header(
     PKImageEncode* pIE)
 {
     ERR err = WMP_errSuccess;
-    struct WMPStream* pS = pIE->pStream;
+    // struct WMPStream* pS = pIE->pStream;
 
     pIE->offPixel = 0;
 
@@ -77,7 +77,7 @@ ERR WriteYUV444Header(
     PKImageEncode* pIE)
 {
     ERR err = WMP_errSuccess;
-    struct WMPStream* pS = pIE->pStream;
+    // struct WMPStream* pS = pIE->pStream;
 
     pIE->offPixel = 0;
 
@@ -101,6 +101,8 @@ ERR PKImageEncode_WritePixels_IYUV(
     U8 *pY;
     U8 *pU;
     U8 *pV;
+
+    UNREFERENCED_PARAMETER( cbStride );
 
     // header
     if (!pIE->fHeaderDone)
@@ -178,6 +180,8 @@ ERR PKImageEncode_WritePixels_YUV422(
     U8 *pU;
     U8 *pV;
 
+    UNREFERENCED_PARAMETER( cbStride );
+
     // header
     if (!pIE->fHeaderDone)
     {
@@ -250,6 +254,8 @@ ERR PKImageEncode_WritePixels_YUV444(
     U8 *pY;
     U8 *pU;
     U8 *pV;
+
+    UNREFERENCED_PARAMETER( cbStride );
 
     // header
     if (!pIE->fHeaderDone)
@@ -363,6 +369,8 @@ ERR ParseIYUVHeader(
 {
     ERR err = WMP_errSuccess;
 
+    UNREFERENCED_PARAMETER( pWS );
+
     // Set header other header parameters
     pID->guidPixFormat = GUID_PKPixelFormat12bppYUV420;
 
@@ -383,6 +391,8 @@ ERR ParseYUV422Header(
 {
     ERR err = WMP_errSuccess;
 
+    UNREFERENCED_PARAMETER( pWS );
+
     // Set header other header parameters
     pID->guidPixFormat = GUID_PKPixelFormat16bppYUV422;
 
@@ -400,6 +410,8 @@ ERR ParseYUV444Header(
     struct WMPStream* pWS)
 {
     ERR err = WMP_errSuccess;
+
+    UNREFERENCED_PARAMETER( pWS );
 
     // Set header other header parameters
     pID->guidPixFormat = GUID_PKPixelFormat24bppYUV444;
@@ -465,6 +477,9 @@ ERR PKImageDecode_Copy_IYUV(
     struct WMPStream* pS = pID->pStream;
 
     size_t iRow, iCol; 
+
+    UNREFERENCED_PARAMETER( pRect );
+    UNREFERENCED_PARAMETER( cbStride );
 
     //from planar to packed! YYYYUV YYYYUV
     uYSize = pID->uWidth * pID->uHeight;
@@ -537,6 +552,9 @@ ERR PKImageDecode_Copy_YUV422(
 
     size_t iRow, iCol; 
 
+    UNREFERENCED_PARAMETER( pRect );
+    UNREFERENCED_PARAMETER( cbStride );
+
     uYSize = pID->uWidth * pID->uHeight;
     uUVSize = (uYSize >> 1);
 
@@ -603,6 +621,9 @@ ERR PKImageDecode_Copy_YUV444(
     struct WMPStream* pS = pID->pStream;
 
     size_t iRow, iCol; 
+
+    UNREFERENCED_PARAMETER( pRect );
+    UNREFERENCED_PARAMETER( cbStride );
 
     //from planar to packed! YYYYUV YYYYUV
     uYSize = pID->uWidth * pID->uHeight;

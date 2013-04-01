@@ -488,10 +488,10 @@ Void transformMacroblock(CWMImageStrCodec * pSC)
     Bool left = (pSC->cColumn == 0), right = (pSC->cColumn == pSC->cmbWidth);
     Bool top = (pSC->cRow == 0), bottom = (pSC->cRow == pSC->cmbHeight);
     Bool leftORright = (left || right), topORbottom = (top || bottom);
-    Bool topORleft = (left || top), rightORbottom = (right || bottom);
+    Bool topORleft = (left || top);// rightORbottom = (right || bottom);
     Bool leftAdjacentColumn = (pSC->cColumn == 1), rightAdjacentColumn = (pSC->cColumn == pSC->cmbWidth - 1);
-    Bool topAdjacentRow =  (pSC->cRow == 1), bottomAdjacentRow = (pSC->cRow == pSC->cmbHeight - 1);
-    PixelI * p = NULL, * pt = NULL;
+    // Bool topAdjacentRow =  (pSC->cRow == 1), bottomAdjacentRow = (pSC->cRow == pSC->cmbHeight - 1);
+    PixelI * p = NULL;// * pt = NULL;
     Int i, j;
     Int iNumChromaFullPlanes = (Int)((YUV_420 == cfColorFormat || YUV_422 == cfColorFormat) ?
         1 : pSC->m_param.cNumChannels);

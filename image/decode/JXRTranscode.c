@@ -474,15 +474,15 @@ Bool isTileExtraction(CWMImageStrCodec * pSC, CWMTranscodingParam * pParam)
 Int WMPhotoTranscode(struct WMPStream * pStreamIn, struct WMPStream * pStreamOut, CWMTranscodingParam * pParam)
 {
     PixelI * pMBBuf, MBBufAlpha[256]; // shared buffer, decoder <=> encoder bridge
-    PixelI * pFrameBuf, * pFrameBufAlpha;
-    CWMIMBInfo * pMBInfo, * pMBInfoAlpha;
+    PixelI * pFrameBuf = NULL, * pFrameBufAlpha = NULL;
+    CWMIMBInfo * pMBInfo = NULL, * pMBInfoAlpha = NULL;
     CWMImageStrCodec * pSCDec, * pSCEnc, * pSC;
     CWMDecoderParameters aDecoderParam = {0};
     U8 * pIOHeaderDec, * pIOHeaderEnc;
     CCodingContext * pContext;
-    CTileQPInfo * pTileQPInfo;
+    CTileQPInfo * pTileQPInfo = NULL;
     ORIENTATION oO = pParam->oOrientation;
-    size_t iAlphaPos;
+    size_t iAlphaPos = 0;
     size_t cUnit;
     size_t i, j, mbLeft, mbRight, mbTop, mbBottom, mbWidth, mbHeight;
 

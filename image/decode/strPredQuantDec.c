@@ -88,7 +88,7 @@ Void predDCACDec(CWMImageStrCodec * pSC)
     const COLORFORMAT cf = pSC->m_param.cfColorFormat;
     const Int iChannels = (cf == YUV_420 || cf == YUV_422) ? 1 : (Int) pSC->m_param.cNumChannels;
     CWMIMBInfo *pMBInfo = &(pSC->MBInfo);
-    size_t mbX = pSC->cColumn, mbY = pSC->cRow;
+    size_t mbX = pSC->cColumn;// mbY = pSC->cRow;
     Int iDCACPredMode = getDCACPredMode(pSC, mbX);
     Int iDCPredMode = (iDCACPredMode & 0x3);
     Int iADPredMode = (iDCACPredMode & 0xC);
@@ -186,7 +186,7 @@ Void predACDec(CWMImageStrCodec * pSC)
 {
     const COLORFORMAT cf = pSC->m_param.cfColorFormat;
     const Int iChannels = (cf == YUV_420 || cf == YUV_422) ? 1 : (Int) pSC->m_param.cNumChannels;
-    size_t mbX = pSC->cColumn, mbY = pSC->cRow;
+    // size_t mbX = pSC->cColumn, mbY = pSC->cRow;
     CWMIMBInfo *pMBInfo = &pSC->MBInfo;
     Int iACPredMode = 2 - pMBInfo->iOrientation;
     PixelI * pOrg, * pRef;
@@ -346,6 +346,8 @@ static Int predCBPCDec(CWMImageStrCodec * pSC, Int iCBP, size_t mbX, size_t mbY,
     const int iNDiff = AVG_NDIFF;
     size_t c1 = c ? 1 : 0;
 
+    UNREFERENCED_PARAMETER( mbY );
+
     if (pModel->m_iState[c1] == 0) {
         if(pSC->m_bCtxLeft) {
             if (pSC->m_bCtxTop) {
@@ -404,6 +406,8 @@ static Int predCBPC420Dec(CWMImageStrCodec * pSC, Int iCBP, size_t mbX, size_t m
     Int iNOrig;
     const int iNDiff = AVG_NDIFF;
 
+    UNREFERENCED_PARAMETER( mbY );
+
     if (pModel->m_iState[1] == 0) {
         if(pSC->m_bCtxLeft) {
             if (pSC->m_bCtxTop) {
@@ -456,6 +460,8 @@ static Int predCBPC422Dec(CWMImageStrCodec * pSC, Int iCBP, size_t mbX, size_t m
 {
     Int iNOrig;
     const int iNDiff = AVG_NDIFF;
+
+    UNREFERENCED_PARAMETER( mbY );
 
     if (pModel->m_iState[1] == 0) {
         if(pSC->m_bCtxLeft) {

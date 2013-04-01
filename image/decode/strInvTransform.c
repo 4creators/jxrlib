@@ -690,20 +690,20 @@ Int  invTransformMacroblock(CWMImageStrCodec * pSC)
 {
     const OVERLAP olOverlap = pSC->WMISCP.olOverlap;
     const COLORFORMAT cfColorFormat = pSC->m_param.cfColorFormat;
-    const BITDEPTH_BITS bdBitDepth = pSC->WMII.bdBitDepth;
+    // const BITDEPTH_BITS bdBitDepth = pSC->WMII.bdBitDepth;
     const Bool left = (pSC->cColumn == 0), right = (pSC->cColumn == pSC->cmbWidth);
     const Bool top = (pSC->cRow == 0), bottom = (pSC->cRow == pSC->cmbHeight);
     const Bool topORbottom = (top || bottom), leftORright = (left || right);
     const Bool topORleft = (top || left), bottomORright = (bottom || right);
     const size_t mbWidth = pSC->cmbWidth, mbX = pSC->cColumn;
-    PixelI * p = NULL, * pt = NULL;
+    PixelI * p = NULL;// * pt = NULL;
     size_t i;
     const size_t iChannels = (cfColorFormat == YUV_420 || cfColorFormat == YUV_422) ? 1 : pSC->m_param.cNumChannels;
     const size_t tScale = pSC->m_Dparam->cThumbnailScale;
     Int j = 0;
 
     Int qp[MAX_CHANNELS], dcqp[MAX_CHANNELS], iStrength = (1 << pSC->WMII.cPostProcStrength);
-    ERR_CODE result = ICERR_OK;
+    // ERR_CODE result = ICERR_OK;
 
     Bool bHPAbsent = (pSC->WMISCP.sbSubband == SB_NO_HIGHPASS || pSC->WMISCP.sbSubband == SB_DC_ONLY);
 
@@ -1170,22 +1170,22 @@ Int  invTransformMacroblock_alteredOperators_hard(CWMImageStrCodec * pSC)
 {
     const OVERLAP olOverlap = pSC->WMISCP.olOverlap;
     const COLORFORMAT cfColorFormat = pSC->m_param.cfColorFormat;
-    const BITDEPTH_BITS bdBitDepth = pSC->WMII.bdBitDepth;
+    // const BITDEPTH_BITS bdBitDepth = pSC->WMII.bdBitDepth;
     const Bool left = (pSC->cColumn == 0), right = (pSC->cColumn == pSC->cmbWidth);
     const Bool top = (pSC->cRow == 0), bottom = (pSC->cRow == pSC->cmbHeight);
     const Bool topORbottom = (top || bottom), leftORright = (left || right);
     const Bool topORleft = (top || left), bottomORright = (bottom || right);
     Bool leftAdjacentColumn = (pSC->cColumn == 1), rightAdjacentColumn = (pSC->cColumn == pSC->cmbWidth - 1);
-    Bool topAdjacentRow =  (pSC->cRow == 1), bottomAdjacentRow = (pSC->cRow == pSC->cmbHeight - 1);
+    // Bool topAdjacentRow =  (pSC->cRow == 1), bottomAdjacentRow = (pSC->cRow == pSC->cmbHeight - 1);
     const size_t mbWidth = pSC->cmbWidth;
-    PixelI * p = NULL, * pt = NULL;
+    PixelI * p = NULL;// * pt = NULL;
     size_t i;
     const size_t iChannels = (cfColorFormat == YUV_420 || cfColorFormat == YUV_422) ? 1 : pSC->m_param.cNumChannels;
     const size_t tScale = pSC->m_Dparam->cThumbnailScale;
     Int j = 0;
 
     Int qp[MAX_CHANNELS], dcqp[MAX_CHANNELS], iStrength = (1 << pSC->WMII.cPostProcStrength);
-    ERR_CODE result = ICERR_OK;
+    // ERR_CODE result = ICERR_OK;
 
 #define mbX               pSC->mbX
 #define mbY               pSC->mbY

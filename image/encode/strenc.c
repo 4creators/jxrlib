@@ -254,8 +254,8 @@ Int encodeMB(CWMImageStrCodec * pSC, Int iMBX, Int iMBY)
         if(EncodeMacroblockHighpass(pSC, pContext, iMBX, iMBY) != ICERR_OK)
             return ICERR_ERROR;
     
-    if(iMBX + 1 == pSC->cmbWidth && (iMBY + 1 == pSC->cmbHeight || 
-        (pSC->cTileRow < pSC->WMISCP.cNumOfSliceMinus1H && iMBY == pSC->WMISCP.uiTileY[pSC->cTileRow + 1] - 1)))
+    if(iMBX + 1 == (int) pSC->cmbWidth && (iMBY + 1 == (int) pSC->cmbHeight || 
+        (pSC->cTileRow < pSC->WMISCP.cNumOfSliceMinus1H && iMBY == (int) pSC->WMISCP.uiTileY[pSC->cTileRow + 1] - 1)))
     { // end of a horizontal slice
         size_t k, l;
 
@@ -269,7 +269,7 @@ Int encodeMB(CWMImageStrCodec * pSC, Int iMBX, Int iMBY)
         }
         
         // reset coding contexts
-        if(iMBY + 1 != pSC->cmbHeight){
+        if(iMBY + 1 != (int) pSC->cmbHeight){
             for(k = 0; k <= pSC->WMISCP.cNumOfSliceMinus1V; k ++)
                 ResetCodingContextEnc(&pSC->m_pCodingContext[k]);
         }
@@ -454,6 +454,7 @@ Int StrIOEncInit(CWMImageStrCodec* pSC)
         for(i = 0; i < pSC->cNumBitIO; i ++){
             if (pSC->cmbHeight * pSC->cmbWidth * pSC->WMISCP.cChannel >= MAX_MEMORY_SIZE_IN_WORDS) {
 #if defined(_WINDOWS_) || defined(UNDER_CE)  // tmpnam does not exist in VS2005 WinCE CRT              
+                Bool bUnicode = sizeof(TCHAR) == 2;
                 pSC->ppTempFile[i] = (TCHAR *)malloc(MAX_PATH * sizeof(TCHAR));
                 if(pSC->ppTempFile[i] == NULL) return ICERR_ERROR;
 
@@ -465,7 +466,7 @@ Int StrIOEncInit(CWMImageStrCodec* pSC)
                 if(!GetTempFileName(szPath, TEXT("wdp"), 0, pSC->ppTempFile[i]))
                     return ICERR_ERROR;
 
-                if(sizeof(TCHAR) == 2){ // unicode file name
+                if(bUnicode){ // unicode file name
                     for(k = j = cSize = 0; cSize < MAX_PATH; cSize ++, j += 2){
                         if(pSC->ppTempFile[i][cSize] == '\0')
                             break;
@@ -644,7 +645,7 @@ Int StrIOEncTerm(CWMImageStrCodec* pSC)
         else if(pSC->WMISCP.bfBitstreamFormat == SPATIAL){
             for(j = 0; j <= pSC->WMISCP.cNumOfSliceMinus1H; j ++){
                 for(i = 0; i <= pSC->WMISCP.cNumOfSliceMinus1V; i ++){
-                    printf("bitstream size for tile (%d, %d): %d.\n", j, i, pSC->pIndexTable[j * (pSC->WMISCP.cNumOfSliceMinus1V + 1) + i]);
+                    printf("bitstream size for tile (%d, %d): %d.\n", j, i, (int) pSC->pIndexTable[j * (pSC->WMISCP.cNumOfSliceMinus1V + 1) + i]);
                 }
             }
         }
@@ -653,7 +654,7 @@ Int StrIOEncTerm(CWMImageStrCodec* pSC)
                 for(i = 0; i <= pSC->WMISCP.cNumOfSliceMinus1V; i ++){
                     size_t * p = &pSC->pIndexTable[(j * (pSC->WMISCP.cNumOfSliceMinus1V + 1) + i) * 4];
                     printf("bitstream size of (DC, LP, AC, FL) for tile (%d, %d): %d %d %d %d.\n", j, i,
-                        p[0], p[1], p[2], p[3]);
+                        (int) p[0], (int) p[1], (int) p[2], (int) p[3]);
                 }
             }
         }
@@ -767,6 +768,9 @@ Int WriteImagePlaneHeader(CWMImageStrCodec * pSC)
         case NCOMPONENT:
             PUTBITS(pIO, (Int) pSC->m_param.cNumChannels - 1, 4);
             PUTBITS(pIO, 0, 4);
+            break;
+        default:
+            break;
     }
 
 // float and 32s additional parameters
@@ -786,6 +790,8 @@ Int WriteImagePlaneHeader(CWMImageStrCodec * pSC)
                 pSCP->nLenMantissaOrShift = 13;//default
             PUTBITS(pIO, pSCP->nLenMantissaOrShift, 8);//float conversion parameters
             PUTBITS(pIO, pSCP->nExpBias, 8);
+            break;
+        default:
             break;
     }
 
@@ -824,9 +830,9 @@ Int WriteWMIHeader(CWMImageStrCodec * pSC)
     CWMIStrCodecParam * pSCP = &pSC->WMISCP;
     CCoreParameters * pCoreParam = &pSC->m_param;
     BitIOInfo* pIO = pSC->pIOHeader;
-    U32 iSizeOfSize = 2, i;
+    U32 /*iSizeOfSize = 2,*/ i;
     // temporary assignments / reserved words
-    const Int HEADERSIZE = 0;
+    // const Int HEADERSIZE = 0;
     Bool bInscribed = FALSE;
     Bool bAbbreviatedHeader = (((pII->cWidth + 15) / 16 > 255 || (pII->cHeight + 15) / 16 > 255) ? FALSE : TRUE);
 
@@ -910,10 +916,11 @@ Int StrEncInit(CWMImageStrCodec* pSC)
 {
     COLORFORMAT cf = pSC->m_param.cfColorFormat;
     COLORFORMAT cfE = pSC->WMII.cfColorFormat;
-    U16 iQPIndexY, iQPIndexYLP, iQPIndexYHP;
-	U16 iQPIndexU, iQPIndexULP, iQPIndexUHP;
-    U16 iQPIndexV, iQPIndexVLP, iQPIndexVHP; 
+    U16 iQPIndexY = 0, iQPIndexYLP = 0, iQPIndexYHP = 0;
+	U16 iQPIndexU = 0, iQPIndexULP = 0, iQPIndexUHP = 0;
+    U16 iQPIndexV = 0, iQPIndexVLP = 0, iQPIndexVHP = 0; 
     size_t i;
+    Bool b32bit = sizeof(size_t) == 4;
 
     /** color transcoding with resolution change **/
     pSC->m_bUVResolutionChange = (((cfE == CF_RGB || cfE == YUV_444 || cfE == CMYK || cfE == CF_RGBE) && 
@@ -923,7 +930,7 @@ Int StrEncInit(CWMImageStrCodec* pSC)
     if(pSC->m_bUVResolutionChange){
         size_t cSize = ((cfE == YUV_422 ? 128 : 256) + (cf == YUV_420 ? 32 : 0)) * pSC->cmbWidth + 256;
 
-        if(sizeof(size_t) == 4){ // integer overlow/underflow check for 32-bit system
+        if(b32bit){ // integer overlow/underflow check for 32-bit system
             if(((pSC->cmbWidth >> 16) * ((cfE == YUV_422 ? 128 : 256) + (cf == YUV_420 ? 32 : 0))) & 0xffff0000)
                 return ICERR_ERROR;
             if(cSize >= 0x3fffffff)
@@ -1348,6 +1355,7 @@ Int ImageStrEncInit(
     CWMImageStrCodec* pSC = NULL, *pNextSC = NULL;
     char* pb = NULL;
     size_t cb = 0;
+    Bool b32bit = sizeof(size_t) == 4;
 
     Int err;
 
@@ -1368,7 +1376,7 @@ Int ImageStrEncInit(
     //================================================
     cb = sizeof(*pSC) + (128 - 1) + (PACKETLENGTH * 4 - 1) + (PACKETLENGTH * 2 ) + sizeof(*pSC->pIOHeader);
     i = cbMacBlockStride + cbMacBlockChroma * (pSCP->cChannel - 1);
-    if(sizeof(size_t) == 4) // integer overlow/underflow check for 32-bit system
+    if(b32bit) // integer overlow/underflow check for 32-bit system
         if(((cMacBlock >> 15) * i) & 0xffff0000)
             return ICERR_ERROR;
     i *= cMacBlock * 2;
@@ -1416,7 +1424,7 @@ Int ImageStrEncInit(
 
     //================================================
     // lay 2 aligned IO buffers just below pIO struct
-    pb = (U8*)ALIGNUP(pb, PACKETLENGTH * 4) + PACKETLENGTH * 2;
+    pb = (char*)ALIGNUP(pb, PACKETLENGTH * 4) + PACKETLENGTH * 2;
     pSC->pIOHeader = (BitIOInfo*)pb;
 
     //================================================
@@ -1553,7 +1561,7 @@ Int ImageStrEncTerm(
     CTXSTRCODEC ctxSC)
 {
     CWMImageStrCodec* pSC = (CWMImageStrCodec*)ctxSC;
-    CWMImageStrCodec *pNextSC = pSC->m_pNextSC;
+    // CWMImageStrCodec *pNextSC = pSC->m_pNextSC;
 
     if (sizeof(*pSC) != pSC->cbStruct)
     {

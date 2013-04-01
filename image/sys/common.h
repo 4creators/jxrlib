@@ -114,7 +114,7 @@ CAdaptiveHuffman *Allocate (Int iNSymbols, CODINGMODE cm);
 /* Timing functions */
 void    reset_timing(double *time);
 void    report_timing(const char *s, double time);
-static double   timeperclock;
+// static double   timeperclock;
 
 /** adaptive model functions **/
 Void UpdateModelMB (COLORFORMAT cf, Int iChannels, Int iLaplacianMean[], CAdaptiveModel *m_pModel);

@@ -25,6 +25,10 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //
 //*@@@---@@@@******************************************************************
+#ifndef ANSI
+#define _CRT_SECURE_NO_WARNINGS
+#endif ANSI
+
 #include <stdlib.h>
 
 #include <JXRTest.h>
@@ -43,7 +47,7 @@ ERR WritePNMHeader(PKImageEncode* pIE)
     int cb = 0;
 
     char szSig[2];
-    U32 uMaxVal;
+    U32 uMaxVal = 0;
 
     PI.pGUIDPixFmt = &pIE->guidPixFormat;
     PixelFormatLookup(&PI, LOOKUP_FORWARD);
@@ -81,10 +85,10 @@ ERR WritePNMHeader(PKImageEncode* pIE)
         Call(WMP_errUnsupportedFormat);
 
     if('P' == szSig[0] && 'F' == szSig[1])
-        cb = sprintf(buf, "%c%c\n%u\n%u\n%s\n",
+        cb = sprintf((char *) buf, "%c%c\n%u\n%u\n%s\n",
             szSig[0], szSig[1], (int)pIE->uWidth, (int)pIE->uHeight, "-1.0000");
     else
-        cb = sprintf(buf, "%c%c\n%u %u\n%u\n",
+        cb = sprintf((char *) buf, "%c%c\n%u %u\n%u\n",
             szSig[0], szSig[1], (int)pIE->uWidth, (int)pIE->uHeight, (int)uMaxVal);
 
     assert(cb < sizeof2(buf));
@@ -199,25 +203,25 @@ ERR ParsePNMHeader(
 
     //================================
     Call(GetLineSkipPound(pWS, line, sizeof2(line)));
-    if (line == strstr(line, "P5"))
+    if (line == (U8 *) strstr((char *) line, "P5"))
     {
         idxChannel = 0;
         Call(GetLineSkipPound(pWS, line, sizeof2(line)));
-        FailIf(2 != sscanf(line, "%u %u", &width, &height), WMP_errUnsupportedFormat);
+        FailIf(2 != sscanf((char *) line, "%u %u", &width, &height), WMP_errUnsupportedFormat);
     }
-    else if(line == strstr(line, "P6"))
+    else if(line == (U8 *) strstr((char *) line, "P6"))
     {
         idxChannel = 1;
         Call(GetLineSkipPound(pWS, line, sizeof2(line)));
-        FailIf(2 != sscanf(line, "%u %u", &width, &height), WMP_errUnsupportedFormat);
+        FailIf(2 != sscanf((char *) line, "%u %u", &width, &height), WMP_errUnsupportedFormat);
     } 
-    else if(line == strstr(line, "PF")) 
+    else if(line == (U8 *) strstr((char *) line, "PF")) 
     {
         idxChannel = 2;
         Call(GetLineSkipPound(pWS, line, sizeof2(line)));
-        FailIf(1 != sscanf(line, "%u", &width), WMP_errUnsupportedFormat);
+        FailIf(1 != sscanf((char *) line, "%u", &width), WMP_errUnsupportedFormat);
         Call(GetLineSkipPound(pWS, line, sizeof2(line)));
-        FailIf(1 != sscanf(line, "%u", &height), WMP_errUnsupportedFormat);
+        FailIf(1 != sscanf((char *) line, "%u", &height), WMP_errUnsupportedFormat);
     } 
     else
     {
@@ -236,7 +240,7 @@ ERR ParsePNMHeader(
     //================================
     Call(GetLineSkipPound(pWS, line, sizeof2(line)));
 
-    FailIf(1 != sscanf(line, "%u", &maxval), WMP_errUnsupportedFormat);
+    FailIf(1 != sscanf((char *) line, "%u", &maxval), WMP_errUnsupportedFormat);
 
     if (2==idxChannel)
     {
@@ -250,7 +254,7 @@ ERR ParsePNMHeader(
         pID->guidPixFormat = *pixFormat[idxChannel][idxBitDepth];
     }
 
-    Call(pWS->GetPos(pWS, &pID->PNM.offPixel));
+    Call(pWS->GetPos(pWS, &pID->EXT.PNM.offPixel));
 
 Cleanup:
     return err;
@@ -301,7 +305,7 @@ ERR PKImageDecode_Copy_PNM(
         size_t offS = cbLineS * (pRect->Y + i) + offLine;
         size_t offM = cbStride * i + offLine;
 
-        Call(pS->SetPos(pS, pID->PNM.offPixel + offS));
+        Call(pS->SetPos(pS, pID->EXT.PNM.offPixel + offS));
         Call(pS->Read(pS, pb + offM, cbLineM));
     }
 

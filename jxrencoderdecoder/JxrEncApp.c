@@ -50,8 +50,8 @@ typedef struct tagWMPENCAPPARGS
 void WmpEncAppUsage(const char* szExe)
 {
     printf(CRLF);
-    printf("Windows Media Photo Encoder Utility" CRLF);
-    printf("Copyright 2012 Microsoft Corporation - All Rights Reserved" CRLF); 
+    printf("JPEG XR Encoder Utility" CRLF);
+    printf("Copyright 2013 Microsoft Corporation - All Rights Reserved" CRLF); 
     printf(CRLF);
     printf("%s [options]..." CRLF, szExe);
     printf(CRLF);
@@ -353,7 +353,7 @@ ERR WmpEncAppParseArgs(int argc, char* argv[], WMPENCAPPARGS* args)
                         idxPF = (size_t)atol(argv[i]);
                         for (k = 0; k < 9; k++)
                         {
-                            if (InvalidPF[k] == idxPF)
+                            if (InvalidPF[k] == (size_t) idxPF)
                             {
                                 printf("*** Unsupported format in JPEG XR ***\n");
                                 Call(WMP_errInvalidArgument);
@@ -443,7 +443,7 @@ ERR WmpEncAppParseArgs(int argc, char* argv[], WMPENCAPPARGS* args)
 
     for (k = 0; k < 8; k++)
     {
-        if (AlphaPF[k] == idxPF) 
+        if (AlphaPF[k] == (size_t) idxPF) 
         {
             if(0 == args->wmiSCP.uAlphaMode)//with Alpha and no default, set default as Planar
             {
@@ -536,7 +536,7 @@ main(int argc, char* argv[])
     PKCodecFactory* pTestFactory = NULL;
     PKImageEncode* pEncoder = NULL;
 
-    clock_t start = 0, finish = 0;
+    // clock_t start = 0, finish = 0;
     WMPENCAPPARGS args;
     char* pExt = NULL;
 

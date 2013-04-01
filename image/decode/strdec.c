@@ -101,6 +101,8 @@ U8 readQuantizer(CWMIQuantizer * pQuantizer[MAX_CHANNELS], BitIOInfo * pIO, size
 // ?????:         (iTileY * cNumOfSliceV + iTileX) % 32
 Int readPacketHeader(BitIOInfo * pIO, U8 ptPacketType, U8 pID)
 {
+    UNREFERENCED_PARAMETER( ptPacketType );
+    UNREFERENCED_PARAMETER( pID );
     if(getBit16(pIO, 8) != 0 || getBit16(pIO, 8) != 0 || getBit16(pIO, 8) != 1)
         return ICERR_ERROR;
     getBit16(pIO, 8);
@@ -307,11 +309,11 @@ Int readPackets(CWMImageStrCodec * pSC)
 Int processMacroblockDec(CWMImageStrCodec * pSC)
 {
     const OVERLAP olOverlap = pSC->WMISCP.olOverlap;
-    const Bool left = (pSC->cColumn == 0);
-    const Bool top = (pSC->cRow == 0), bottom = (pSC->cRow == pSC->cmbHeight);
-    const bottomORright = (bottom || pSC->cColumn == pSC->cmbWidth);
-    const size_t mbWidth = pSC->cmbWidth, mbX = pSC->cColumn;
-    Int iQIndex = 0;
+    // const Bool left = (pSC->cColumn == 0);
+    const Bool /*top = (pSC->cRow == 0),*/ bottom = (pSC->cRow == pSC->cmbHeight);
+    const Bool bottomORright = (bottom || pSC->cColumn == pSC->cmbWidth);
+    // const size_t mbWidth = pSC->cmbWidth, mbX = pSC->cColumn;
+    // Int iQIndex = 0;
     ERR_CODE result = ICERR_OK;
     size_t j, jend = (pSC->m_pNextSC != NULL);
 
@@ -417,7 +419,7 @@ static _FORCEINLINE void inverseConvert (PixelI iF, U8 *pRGB, U8 *pE)
     }
     else if ((iF >> 7) > 1) {
         /** normal form **/
-        *pE = (iF >> 7); //+ 1;
+        *pE = (U8) (iF >> 7); //+ 1;
         *pRGB = (iF & 0x7f) | 0x80;
     }
     else {  
@@ -469,7 +471,7 @@ static _FORCEINLINE float pixel2float(PixelI _h, const char _c, const unsigned c
 
     I32 s, iTempH, m, e, lmshift = (1 << _lm);
 
-    assert (_c <= 127);
+    // assert (_c <= 127);
 
     iTempH = (I32) _h ;
     s = (iTempH >> 31);
@@ -515,7 +517,7 @@ Void interpolateUV(CWMImageStrCodec * pSC)
     PixelI * pSrcU = pSC->a0MBbuffer[1], * pSrcV = pSC->a0MBbuffer[2];
     PixelI * pDstU = pSC->pResU, * pDstV = pSC->pResV;
     size_t iRow, iColumn;
-    size_t iIdxS, iIdxD;
+    size_t iIdxS = 0, iIdxD = 0;
 
     if(pSC->m_param.cfColorFormat == YUV_422){  // 422 => 444, interpolate horizontally
         for(iRow = 0; iRow < 16; iRow ++){
@@ -607,7 +609,7 @@ Void outputNChannel(CWMImageStrCodec * pSC, size_t iFirstRow, size_t iFirstColum
 {
     const CWMImageInfo* pII = &pSC->WMII;
     const size_t cChannel = pII->cfColorFormat == Y_ONLY ? 1 : pSC->WMISCP.cChannel;
-    const U8 cbChannels[BDB_MAX] = {-1, 1, 2, 2, 2, 4, 4, -1, -1, };
+    // const U8 cbChannels[BDB_MAX] = {-1, 1, 2, 2, 2, 4, 4, -1, -1, };
     const U8 nLen = pSC->WMISCP.nLenMantissaOrShift;
     const I8 nExpBias = pSC->WMISCP.nExpBias;
 
@@ -955,7 +957,7 @@ Int outputMBRow(CWMImageStrCodec * pSC)
         case YUV_420:
 			{
 				PixelI y0, y1, y2, y3, u, v;
-				const size_t iS4[8][4] = {{0, 1, 2, 3}, {2, 3, 0, 1}, {1, 0, 3, 2}, {3, 2, 1, 0}, {1, 3, 0, 2}, {3, 1, 2, 0}, {0, 2, 1, 3}, {2, 0, 3, 1}};
+				// const size_t iS4[8][4] = {{0, 1, 2, 3}, {2, 3, 0, 1}, {1, 0, 3, 2}, {3, 2, 1, 0}, {1, 3, 0, 2}, {3, 1, 2, 0}, {0, 2, 1, 3}, {2, 0, 3, 1}};
 	
 				for(iRow = iFirstRow; iRow < cHeight; iRow += 2){
                     I32 * pRow = pDst;
@@ -1079,8 +1081,8 @@ Int outputMBRow(CWMImageStrCodec * pSC)
         case YUV_422:
 			{
 				PixelI y0, y1, u, v;
-				const ORIENTATION oO = pSC->WMII.oOrientation;
-				const size_t i0 = ((oO > O_FLIPV && oO <= O_RCW_FLIPVH) ? 1 : 0), i1 = 1 - i0;
+				// const ORIENTATION oO = pSC->WMII.oOrientation;
+				// const size_t i0 = ((oO > O_FLIPV && oO <= O_RCW_FLIPVH) ? 1 : 0), i1 = 1 - i0;
 	
 				for(iRow = iFirstRow; iRow < cHeight; iRow ++){
 					for(iColumn = iFirstColumn, iY = pOffsetY[iRow]; iColumn < cWidth; iColumn += 2){
@@ -1382,7 +1384,7 @@ Int outputMBRow(CWMImageStrCodec * pSC)
 	
 						c = (c >> iShift) << nLen, m = (m >> iShift) << nLen, y = (y >> iShift) << nLen, k = (k >> iShift) << nLen;
 	
-						pDst = (U16 *)pSC->WMIBI.pv + pOffsetX[iColumn] + iY;
+						pDst = (I16 *)pSC->WMIBI.pv + pOffsetX[iColumn] + iY;
 						pDst[0] = (I16)(c), pDst[1] = (I16)(m), pDst[2] = (I16)(y), pDst[3] = (I16)(k);
 					}
 				}
@@ -1925,7 +1927,7 @@ Int decodeThumbnail(CWMImageStrCodec * pSC)
     const U8 nLen = pSC->WMISCP.nLenMantissaOrShift;
     const I8 nExpBias = pSC->WMISCP.nExpBias;
     PixelI offset;
-    size_t iRow, iColumn, iIdx1, iIdx2, iIdx3, nBits = 0;
+    size_t iRow, iColumn, iIdx1, iIdx2, iIdx3 = 0, nBits = 0;
     PixelI * pSrcY = pSC->a0MBbuffer[0];
     PixelI * pSrcU = pSC->a0MBbuffer[1], * pSrcV = pSC->a0MBbuffer[2];
     size_t * pOffsetX = pSC->m_Dparam->pOffsetX, * pOffsetY = pSC->m_Dparam->pOffsetY + (pSC->cRow - 1) * 16 / tScale, iY;
@@ -2524,7 +2526,7 @@ Int StrIODecInit(CWMImageStrCodec* pSC)
                 for(i = 0; i <= pSC->WMISCP.cNumOfSliceMinus1V; i ++){
                     size_t * p = &pSC->pIndexTable[j * (pSC->WMISCP.cNumOfSliceMinus1V + 1) + i];
                     if(i + j != pSC->WMISCP.cNumOfSliceMinus1H + pSC->WMISCP.cNumOfSliceMinus1V){
-                        printf("bitstream size for tile (%d, %d): %d.\n", j, i, p[1] - p[0]);
+                        printf("bitstream size for tile (%d, %d): %d.\n", j, i, (int) (p[1] - p[0]));
                     }
                     else{
                         printf("bitstream size for tile (%d, %d): unknown.\n", j, i);
@@ -2538,11 +2540,11 @@ Int StrIODecInit(CWMImageStrCodec* pSC)
                     size_t * p = &pSC->pIndexTable[(j * (pSC->WMISCP.cNumOfSliceMinus1V + 1) + i) * 4];
                     if(i + j != pSC->WMISCP.cNumOfSliceMinus1H + pSC->WMISCP.cNumOfSliceMinus1V){
                         printf("bitstream size of (DC, LP, AC, FL) for tile (%d, %d): %d %d %d %d.\n", j, i,
-                            p[1] - p[0], p[2] - p[1], p[3] - p[2], p[4] - p[3]);
+                            (int) (p[1] - p[0]), (int) (p[2] - p[1]), (int) (p[3] - p[2]), (int) (p[4] - p[3]));
                     }
                     else{
                         printf("bitstream size of (DC, LP, AC, FL) for tile (%d, %d): %d %d %d unknown.\n", j, i,
-                            p[1] - p[0], p[2] - p[1], p[3] - p[2]);
+                            (int) (p[1] - p[0]), (int) (p[2] - p[1]), (int) (p[3] - p[2]));
                     }
                 }
             }
@@ -2564,7 +2566,7 @@ Int StrIODecTerm(CWMImageStrCodec* pSC)
 
 Int initLookupTables(CWMImageStrCodec* pSC)
 {
-    static const U8 cbChannels[BDB_MAX] = {1, 1, 2, 2, 2, 4, 4, 4, -1, -1, -1 };
+    static const U8 cbChannels[BDB_MAX] = {1, 1, 2, 2, 2, 4, 4, 4, (U8) -1, (U8) -1, (U8) -1 };
 
     CWMImageInfo * pII = &pSC->WMII;
     size_t cStrideX, cStrideY;
@@ -2710,7 +2712,7 @@ Void setROI(CWMImageStrCodec* pSC)
 
 Int StrDecInit(CWMImageStrCodec* pSC)
 {
-    CWMImageInfo * pWMII = &pSC->WMII;
+    // CWMImageInfo * pWMII = &pSC->WMII;
     COLORFORMAT cfInt = pSC->m_param.cfColorFormat;
     COLORFORMAT cfExt = pSC->WMII.cfColorFormat;
     size_t i;
@@ -2869,6 +2871,8 @@ Int ReadImagePlaneHeader(CWMImageInfo* pII, CWMIStrCodecParam *pSCP,
         case CMYK:
             pSC->cNumChannels = 4;
             break;
+        default:
+            break;
     }
 
 // float and 32s additional parameters
@@ -2882,6 +2886,8 @@ Int ReadImagePlaneHeader(CWMImageInfo* pII, CWMIStrCodecParam *pSCP,
         case BD_32F:
             pSCP->nLenMantissaOrShift = (U8) getBit32_SB(pSB, 8);//float conversion parameters
             pSCP->nExpBias = (I8) getBit32_SB(pSB, 8);
+            break;
+        default:
             break;
     }
 
@@ -2948,15 +2954,15 @@ Int ReadWMIHeader(
     U8 szMS[8] = {0};
     U32 cbStream = 0;
 
-    U32 bits = 0;
-    Int HEADERSIZE = 0;
+    // U32 bits = 0;
+    // Int HEADERSIZE = 0;
 
     assert(pSC != NULL);
     //================================
 // 0
     /** signature **/
     Call(pWS->Read(pWS, szMS, sizeof(szMS)));
-    FailIf(szMS != strstr(szMS, "WMPHOTO"), WMP_errUnsupportedFormat);
+    FailIf(szMS != (U8 *) strstr((char *) szMS, "WMPHOTO"), WMP_errUnsupportedFormat);
     //================================
     Call(attach_SB(pSB, pWS));
 
@@ -3230,6 +3236,7 @@ Int ImageStrDecInit(
     size_t cb = 0, i;
     Bool bLossyTranscoding = FALSE;
     Bool bUseHardTileBoundaries = FALSE; //default is soft tile boundaries
+    Bool bLessThan64Bit = sizeof(void *) < 8;
 
     *pctxSC = NULL;
 
@@ -3274,7 +3281,7 @@ Int ImageStrDecInit(
     cb += (PACKETLENGTH * 4 - 1) + (PACKETLENGTH * 2 ) + sizeof(*pSC->pIOHeader);
 
     i = (cbMacBlockStride + cbMacBlockChroma * (SC.m_param.cNumChannels - 1)) * 2; // i <= 2^15
-    if (sizeof(void *) < 8 && ((i * (cMacBlock >> 16)) & 0xffffc000)) {
+    if (bLessThan64Bit && ((i * (cMacBlock >> 16)) & 0xffffc000)) {
         /** potential overflow - 32 bit pointers insufficient to address cache **/
         return ICERR_ERROR;
     }
@@ -3317,7 +3324,7 @@ Int ImageStrDecInit(
 
     //================================================
     // lay 2 aligned IO buffers just below pIO struct
-    pb = (U8*)ALIGNUP(pb, PACKETLENGTH * 4) + PACKETLENGTH * 2;
+    pb = (char*)ALIGNUP(pb, PACKETLENGTH * 4) + PACKETLENGTH * 2;
     pSC->pIOHeader = (BitIOInfo*)pb; pb += sizeof(*pSC->pIOHeader);
 
     // if interleaved alpha is needed
@@ -3495,8 +3502,8 @@ Int ImageStrDecDecode(
 #ifdef REENTRANT_MODE
     for (pSC->cRow = pSC->WMIBI.uiFirstMBRow; pSC->cRow <= pSC->WMIBI.uiLastMBRow; pSC->cRow++)
     {
+        // const COLORFORMAT cfExt = (pSC->m_param.cfColorFormat == Y_ONLY ? Y_ONLY : pSC->WMII.cfColorFormat);
 
-        const COLORFORMAT cfExt = (pSC->m_param.cfColorFormat == Y_ONLY ? Y_ONLY : pSC->WMII.cfColorFormat);
         if (0 == pSC->cRow)
         {
             ProcessLeft = pSC->ProcessTopLeft;

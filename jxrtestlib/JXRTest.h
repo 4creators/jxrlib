@@ -137,7 +137,7 @@ typedef struct tagPKTestDecode
             Float fResY;
             Bool fLittleEndian;
         } TIF;
-    };
+    } EXT;
 #ifdef __ANSI__
 #undef PKTestDecode
 #endif // __ANSI__

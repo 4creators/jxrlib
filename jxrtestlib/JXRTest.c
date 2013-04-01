@@ -230,6 +230,8 @@ ERR PKCreateTestFactory(PKCodecFactory** ppCFactory, U32 uVersion)
     ERR err = WMP_errSuccess;
     PKCodecFactory* pCFactory = NULL;
 
+    UNREFERENCED_PARAMETER( uVersion );
+
     Call(PKAlloc(ppCFactory, sizeof(**ppCFactory)));
     pCFactory = *ppCFactory;
 
@@ -270,6 +272,11 @@ ERR PKTestDecode_Copy(
     U8* pb,
     U32 cbStride)
 {
+    UNREFERENCED_PARAMETER( pID );
+    UNREFERENCED_PARAMETER( pRect );
+    UNREFERENCED_PARAMETER( pb );
+    UNREFERENCED_PARAMETER( cbStride );
+
     return WMP_errAbstractMethod;
 }
 
