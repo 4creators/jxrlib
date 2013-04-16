@@ -35,9 +35,9 @@ DIR_SYS=image/sys
 DIR_DEC=image/decode
 DIR_ENC=image/encode
 
-DIR_GLUE=JXRGlueLib
-DIR_TEST=JXRTestLib
-DIR_EXEC=JXREncoderDecoder
+DIR_GLUE=jxrgluelib
+DIR_TEST=jxrtestlib
+DIR_EXEC=jxrencoderdecoder
 
 CFLAGS=-I. -Icommon/include -I$(DIR_SYS) -D__ANSI__ -DDISABLE_PERF_MEASUREMENT -w -O
 ##
@@ -90,7 +90,7 @@ libjpegxr.a: $(OBJ_ENC) $(OBJ_DEC) $(OBJ_SYS)
 ## Glue files
 ##
 
-OBJ_GLUE=JXRGlue.o JXRMeta.o JXRGluePFC.o JXRGluejxr.o
+OBJ_GLUE=JXRGlue.o JXRMeta.o JXRGluePFC.o JXRGlueJxr.o
 
 $(OBJ_GLUE):
 	$(CC) $(CFLAGS) -I$(DIR_GLUE) -c $(DIR_GLUE)/$*.c
