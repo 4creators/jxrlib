@@ -703,10 +703,10 @@ main(int argc, char* argv[])
 		        else if (PI.bdBitDepth == BD_16)
 		        {
 			        if (args.fltAlphaQuality >= 0.8F)
-				        pEncoder->WMP.wmiSCP.uiDefaultQPIndex = (U8)(260 - 200.0F *
+				        pEncoder->WMP.wmiSCP_Alpha.uiDefaultQPIndex = (U8)(260 - 200.0F *
 					        args.fltAlphaQuality + 0.5F);
 			        else
-				        pEncoder->WMP.wmiSCP.uiDefaultQPIndex = (U8)(180 - 100.0F *
+				        pEncoder->WMP.wmiSCP_Alpha.uiDefaultQPIndex = (U8)(180 - 100.0F *
 					        args.fltAlphaQuality + 0.5F);
 		        }
 		        else if (PI.bdBitDepth == BD_32F)
