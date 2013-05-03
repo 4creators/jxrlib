@@ -46,8 +46,7 @@ extern "C" {
 #define min(b,a) ((a) < (b) ? (a) : (b))
 #endif
 #ifdef __ANSI__
-//#define STRCPY_SAFE(pszDest, cbDest, pszSrc)    (strcpy((pszDest), (pszSrc)) == (pszDest) ? 0 : 1)
-#define STRCPY_SAFE(pszDest, cbDest, pszSrc)    (strlcpy((pszDest), (pszSrc), (cbDest)) < (cbDest) ? 0 : 1) // Macintosh impl, not ANSI
+#define STRCPY_SAFE(pszDest, cbDest, pszSrc)    (strncpy((pszDest), (pszSrc), (cbDest)) == (pszDest) ? 0 : 1)
 #else
 #define STRCPY_SAFE(pszDest, cbDest, pszSrc)    (strcpy_s((pszDest), (cbDest), (pszSrc)))
 #endif // __ANSI__
