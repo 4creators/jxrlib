@@ -195,10 +195,14 @@ void WmpDecAppUsage(const char* szExe)
 
 void WmpDecAppShowArgs(WMPDECAPPARGS* args)
 {
+	GUID guidPF = args->guidPixFormat;
+
     printf("================================" CRLF);
     printf("Input file:     %s" CRLF, args->szInputFile);
     printf("Output file:    %s" CRLF, args->szOutputFile);
-    printf("Color format:   %x" CRLF, args->guidPixFormat);
+    printf("Color format:   %08X-%04X-%04X-%02X%02X%02X%02X%02X%02X%02X%02X" CRLF, 
+        guidPF.Data1, guidPF.Data2, guidPF.Data3, guidPF.Data4[0], guidPF.Data4[1], guidPF.Data4[2],
+        guidPF.Data4[3], guidPF.Data4[4], guidPF.Data4[5], guidPF.Data4[6], guidPF.Data4[7]);
     printf("Post processing strength: %d" CRLF, args->cPostProcStrength);
     printf("Thumbnail:      %d" CRLF, (int) args->tThumbnailFactor);
     printf("================================" CRLF);

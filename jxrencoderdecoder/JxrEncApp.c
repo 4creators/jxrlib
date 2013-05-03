@@ -173,11 +173,15 @@ void WmpEncAppUsage(const char* szExe)
 void WmpEncAppShowArgs(WMPENCAPPARGS* args)
 {
     const char *szCF[] = {"Y_ONLY", "YUV_420", "YUV_422", "YUV_444", "CMYK"};
+
+	GUID guidPF = args->guidPixFormat;
     
     printf("================================" CRLF);
     printf("Input file:   %s" CRLF, args->szInputFile);
     printf("Output file:  %s" CRLF, args->szOutputFile);
-    printf("Color format: %x" CRLF, args->guidPixFormat);
+    printf("Color format: %08X-%04X-%04X-%02X%02X%02X%02X%02X%02X%02X%02X" CRLF, 
+        guidPF.Data1, guidPF.Data2, guidPF.Data3, guidPF.Data4[0], guidPF.Data4[1], guidPF.Data4[2],
+        guidPF.Data4[3], guidPF.Data4[4], guidPF.Data4[5], guidPF.Data4[6], guidPF.Data4[7]);
     printf("Internal cf:  %s" CRLF, szCF[args->wmiSCP.cfColorFormat]);
     printf("Overlap:      %s" CRLF, 0 < args->wmiSCP.olOverlap ? "yes" : "no");
     printf("DCOverlap:    %s" CRLF, 1 < args->wmiSCP.olOverlap ? "yes" : "no");
@@ -607,7 +611,7 @@ main(int argc, char* argv[])
         Call(pEncoder->Initialize(pEncoder, pEncodeStream, &args.wmiSCP, sizeof(args.wmiSCP)));
 
 	    //ImageQuality  Q (BD==1)  Q (BD==8)   Q (BD==16)  Q (BD==32F) Subsample   Overlap
-	    //[0.0, 0.4]    8-IQ*5     (see table) (see table) (see table  4:4:4       2
+	    //[0.0, 0.4]    8-IQ*5     (see table) (see table) (see table) 4:4:4       2
 	    //(0.4, 0.8)    8-IQ*5     (see table) (see table) (see table) 4:4:4       1
 	    //[0.8, 1.0)    8-IQ*5     (see table) (see table) (see table) 4:4:4       1
 	    //[1.0, 1.0]    1          1           1           1           4:4:4       0
