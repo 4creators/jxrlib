@@ -42,7 +42,6 @@ typedef struct tagWMPENCAPPARGS
 
     CWMIStrCodecParam wmiSCP;
     float fltImageQuality;
-    float fltAlphaQuality;
     Bool bOverlapSet;
 } WMPENCAPPARGS;
 
@@ -64,9 +63,8 @@ void WmpEncAppUsage(const char* szExe)
     printf("  -o output.jxr                Output JPEG XR file name" CRLF);
     printf(CRLF);
 
-    printf("  -q quality                   [0.0 - 1.0) : quality" CRLF);
-    printf("  or quantization              [1   - 255] : quantization" CRLF);
-    printf("                               Default is lossless (1.0 quality or 1 quantization)" CRLF);
+    printf("  -q quality                   [0.0 - 1.0) Default = 1.0, lossless" CRLF);
+    printf("  or quantization              [1   - 255] Default = 1, lossless" CRLF);
     printf(CRLF);
 
     printf("  -c format                    Required to define uncompressed source pixel format" CRLF);
@@ -140,11 +138,11 @@ void WmpEncAppUsage(const char* szExe)
     printf(CRLF);
     printf("  -v                           Display verbose encoder information" CRLF);
     printf(CRLF);
-    printf("  -V tile_wd0 [tile_wd1 ... ]  Macro block rows per tile " CRLF);
+    printf("  -V tile_wd0 [tile_wd1 ... ]  Macro block columns per tile " CRLF);
     printf(CRLF);
-    printf("  -H tile_ht0 [tile_ht1 ... ]  Macro block columns per tile" CRLF);
+    printf("  -H tile_ht0 [tile_ht1 ... ]  Macro block rows per tile" CRLF);
     printf(CRLF);
-    printf("  -U num_h_tiles num_v_tiles   Horiz & vert tile count for uniform tiling" CRLF);
+    printf("  -U num_v_tiles num_h_tiles   Vertical & horizontal tile count for uniform tiling" CRLF);
     printf(CRLF);
 
     printf("  -b Black/White               Applies to 1bpp black/white images" CRLF);
@@ -158,9 +156,7 @@ void WmpEncAppUsage(const char* szExe)
     printf("                               Other: Reserved, do not use" CRLF);
     printf(CRLF);
 
-    printf("  -Q quality                   [0.0 - 1.0) : quality" CRLF);
-    printf("  or quantization              [1   - 255] : quantization" CRLF);
-    printf("  for alpha                    Default is lossless (1.0 quality or 1 quantization)" CRLF);
+    printf("  -Q quantization for alpha    [1 - 255] Default = 1, lossless" CRLF);
     printf(CRLF);
 
     printf("  -F trimmed flexbits          [0 - 15]  0: no trimming (default)" CRLF);    
@@ -210,7 +206,6 @@ void WmpEncAppInitDefaultArgs(WMPENCAPPARGS* args)
     args->wmiSCP.uiDefaultQPIndexAlpha = 1;
 
     args->fltImageQuality = 1.f;
-    args->fltAlphaQuality = 1.f;
     args->bOverlapSet = 0;
 }
 
@@ -338,11 +333,7 @@ ERR WmpEncAppParseArgs(int argc, char* argv[], WMPENCAPPARGS* args)
                         break;
 
                     case 'Q':
-                        {
-                            args->fltAlphaQuality = (float) atof(argv[i]);
-                            if (args->fltAlphaQuality < 0.f || args->fltAlphaQuality > 255.f)
-                                Call(WMP_errInvalidArgument);
-                        }
+                        args->wmiSCP.uiDefaultQPIndexAlpha = (U8)(atoi(argv[i]));
                         break;
 
                     case 's':
@@ -381,7 +372,7 @@ ERR WmpEncAppParseArgs(int argc, char* argv[], WMPENCAPPARGS* args)
                     case 'H': // horizontal tiling
                         for(j = 0;;i ++, j ++){
                             args->wmiSCP.uiTileY[j] = atoi(argv[i]);
-                            if(i + 1 == argc || argv[i + 1][0] == '-' || j >= 255)
+                            if(i + 1 == argc || argv[i + 1][0] == '-' || j >= MAX_TILES-1)
                                 break;
                         }
                         args->wmiSCP.cNumOfSliceMinus1H = (U8)j;
@@ -390,7 +381,7 @@ ERR WmpEncAppParseArgs(int argc, char* argv[], WMPENCAPPARGS* args)
                     case 'V': // vertical tiling
                         for(j = 0;;i ++, j ++){
                             args->wmiSCP.uiTileX[j] = atoi(argv[i]);
-                            if(i + 1 == argc || argv[i + 1][0] == '-' || j >= 255)
+                            if(i + 1 == argc || argv[i + 1][0] == '-' || j >= MAX_TILES-1)
                                 break;
                         }
                         args->wmiSCP.cNumOfSliceMinus1V = (U8)j;
@@ -616,9 +607,9 @@ main(int argc, char* argv[])
         Call(pEncoder->Initialize(pEncoder, pEncodeStream, &args.wmiSCP, sizeof(args.wmiSCP)));
 
 	    //ImageQuality  Q (BD==1)  Q (BD==8)   Q (BD==16)  Q (BD==32F) Subsample   Overlap
-	    //[0.0, 0.4]    8-IQ*5     (see table) 180-IQ*100  30-IQ*25    4:4:4       2
-	    //(0.4, 0.8)    8-IQ*5     (see table) 180-IQ*100  30-IQ*25    4:4:4       1
-	    //[0.8, 1.0)    8-IQ*5     (see table) 260-IQ*200  30-IQ*25    4:4:4       1
+	    //[0.0, 0.4]    8-IQ*5     (see table) (see table) (see table  4:4:4       2
+	    //(0.4, 0.8)    8-IQ*5     (see table) (see table) (see table) 4:4:4       1
+	    //[0.8, 1.0)    8-IQ*5     (see table) (see table) (see table) 4:4:4       1
 	    //[1.0, 1.0]    1          1           1           1           4:4:4       0
 	
         if (args.fltImageQuality < 1.0F)
@@ -674,59 +665,8 @@ main(int argc, char* argv[])
             pEncoder->WMP.wmiSCP.uiDefaultQPIndex = (U8) args.fltImageQuality;
         }
 
-        if(pEncoder->WMP.wmiSCP.uAlphaMode != 0)
-        {
-            if (args.fltAlphaQuality < 1.0F)
-	        {
-                if (!args.bOverlapSet)
-                {
-		            if (args.fltAlphaQuality > 0.4F)
-			            pEncoder->WMP.wmiSCP_Alpha.olOverlap = OL_ONE;
-		            else
-			            pEncoder->WMP.wmiSCP_Alpha.olOverlap = OL_TWO;
-                }
-
-		        if (PI.bdBitDepth == BD_8)
-		        {
-                    // remap [0.8, 0.866, 0.933, 1.0] to [0.8, 0.9, 1.0, 1.1]
-                    // to use DPK QP table
-                    int qi;
-                    float qf;
-                    if (args.fltAlphaQuality > 0.8f)
-                        args.fltAlphaQuality = 0.8f + (args.fltAlphaQuality - 0.8f) * 1.5f;
-
-                    qi = (int) (10.f * args.fltAlphaQuality);
-                    qf = 10.f * args.fltAlphaQuality - (float) qi;
-                    pEncoder->WMP.wmiSCP_Alpha.uiDefaultQPIndex = (U8) (0.5f +
-                            (float) DPK_QPS_8[qi][0] * (1.f - qf) + (float) DPK_QPS_8[qi + 1][0] * qf);
-		        }
-		        else if (PI.bdBitDepth == BD_16)
-		        {
-			        if (args.fltAlphaQuality >= 0.8F)
-				        pEncoder->WMP.wmiSCP_Alpha.uiDefaultQPIndex = (U8)(260 - 200.0F *
-					        args.fltAlphaQuality + 0.5F);
-			        else
-				        pEncoder->WMP.wmiSCP_Alpha.uiDefaultQPIndex = (U8)(180 - 100.0F *
-					        args.fltAlphaQuality + 0.5F);
-		        }
-		        else if (PI.bdBitDepth == BD_32F)
-		        {
-			        pEncoder->WMP.wmiSCP_Alpha.uiDefaultQPIndex = (U8)(30 - 25.0F *
-				        args.fltAlphaQuality + 0.5F);
-                    pEncoder->WMP.wmiSCP_Alpha.cfColorFormat = YUV_444; // spec says float must be YUV 444
-		        }
-		        else
-                {
-                    pEncoder->WMP.wmiSCP_Alpha.uiDefaultQPIndex = 1; // Default to lossless
-                }
-            }
-            else
-            {
-                pEncoder->WMP.wmiSCP_Alpha.uiDefaultQPIndex = (U8) args.fltAlphaQuality;
-            }
-
-            args.wmiSCP.uiDefaultQPIndexAlpha = pEncoder->WMP.wmiSCP_Alpha.uiDefaultQPIndex;
-        }
+        if(pEncoder->WMP.wmiSCP.uAlphaMode == 2)
+            pEncoder->WMP.wmiSCP_Alpha.uiDefaultQPIndex = args.wmiSCP.uiDefaultQPIndexAlpha;
 
         Call(pEncoder->SetPixelFormat(pEncoder, args.guidPixFormat));
 
