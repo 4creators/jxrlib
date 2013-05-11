@@ -119,7 +119,7 @@ libjxrglue.a: $(OBJ_GLUE) $(OBJ_TEST)
 ##
 
 LIBRARIES=libjxrglue.a libjpegxr.a
-LIBS=-L. $(LIBRARIES)
+LIBS=-L. $(LIBRARIES) -lm
 ENCAPP=JxrEncApp
 
 $(ENCAPP): $(LIBRARIES) 

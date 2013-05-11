@@ -33,6 +33,110 @@
 //================================================================
 // PKFormatConverter
 //================================================================
+#define HLF_MIN 0.00006103515625f
+#define HLF_MAX 65504.0f
+
+#define HLF_MIN_BITS 0x0400
+#define HLF_MAX_BITS 0x7bff
+
+#define HLF_MIN_BITS_NEG (HLF_MIN_BITS | 0x8000)
+#define HLF_MAX_BITS_NEG (HLF_MAX_BITS | 0x8000)
+
+#define HLF_QNaN_BITZS 0x7fff
+
+// simple and slow implementation of half <-> float conversion
+static U32 Convert_Half_To_Float(U16 u16)
+{
+    // 1s5e10m -> 1s8e23m
+    const U32 s = (u16 >> 15) & 0x0001;
+    const U32 e = (u16 >> 10) & 0x001f;
+    const U32 m = (u16 >>  0) & 0x03ff;
+
+    if (0 == e) // 0, denorm
+    {
+        return s << 31;
+    }
+    else if (~(~0 << 5) == e) // inf, snan, qnan
+    {
+        return (s << 31) | ~(~0 << 8) << 23| (m << 13);
+    }
+
+    return (s << 31) | ((e - 15 + 127) << 23) | (m << 13); // norm
+}
+
+
+static U16 Convert_Float_To_Half(float f)
+{
+    // 1s5e10m -> 1s8e23m
+    const U32 iFloat = *(U32*)&f; // Convert float to U32
+
+    if (f != f)
+    {
+        return (U16)(iFloat | HLF_QNaN_BITZS); // +QNaN, -QNaN
+    }
+    else if (f < -HLF_MAX)
+    {
+        return HLF_MAX_BITS_NEG;
+    }
+    else if (HLF_MAX < f)
+    {
+        return HLF_MAX_BITS;
+    }
+    else if (-HLF_MIN < f && f < HLF_MIN)
+    {
+        return (U16)((iFloat >> 16) & 0x8000); // +0, -0
+    }
+
+    // Cut-and-paste from C++, introduce scope so we can decl more vars
+    {
+    const U32 s = (iFloat >> 31) & 0x00000001;
+    const U32 e = (iFloat >> 23) & 0x000000ff;
+    const U32 m = (iFloat >>  0) & 0x007fffff;
+
+    return (U16) ((s << 15) | ((e - 127 + 15) << 10) | (m >> 13));
+    }
+}
+
+
+static U8 Convert_Float_To_U8(float f)
+{
+    // convert from linear scRGB to non-linear sRGB
+    if (f <= 0)
+    {
+        return 0;
+    }
+    else if (f <= 0.0031308f)
+    {
+        return (U8)((255.0f * f * 12.92f) + 0.5f);
+    }
+    else if (f < 1.0f)
+    {
+        return (U8)((255.0f * ((1.055f * (float)pow(f, 1.0 / 2.4)) - 0.055f)) + 0.5f);
+    }
+    else
+    {
+        return 255;
+    }
+}
+
+static U8 Convert_AlphaFloat_To_U8(float f)
+{
+    // alpha is converted differently than RGB in scRGB
+    if (f <= 0)
+    {
+        return 0;
+    }
+    else if (f < 1.0f)
+    {
+        return (U8)((255.0f * f) + 0.5f);
+    }
+    else
+    {
+        return 255;
+    }
+}
+
+
 ERR RGB24_BGR24(PKFormatConverter* pFC, const PKRect* pRect, U8* pb, U32 cbStride)
 {
     I32 i = 0, j = 0;
@@ -905,70 +1009,6 @@ ERR RGB96Float_RGBE(PKFormatConverter* pFC, const PKRect* pRect, U8* pb, U32 cbS
     return WMP_errSuccess;
 }
 
-#define HLF_MIN 0.00006103515625f
-#define HLF_MAX 65504.0f
-
-#define HLF_MIN_BITS 0x0400
-#define HLF_MAX_BITS 0x7bff
-
-#define HLF_MIN_BITS_NEG (HLF_MIN_BITS | 0x8000)
-#define HLF_MAX_BITS_NEG (HLF_MAX_BITS | 0x8000)
-
-#define HLF_QNaN_BITZS 0x7fff
-
-// simple and slow implementation of half <-> float conversion
-static U32 Convert_Half_To_Float(U16 u16)
-{
-    // 1s5e10m -> 1s8e23m
-    const U32 s = (u16 >> 15) & 0x0001;
-    const U32 e = (u16 >> 10) & 0x001f;
-    const U32 m = (u16 >>  0) & 0x03ff;
-
-    if (0 == e) // 0, denorm
-    {
-        return s << 31;
-    }
-    else if (~(~0 << 5) == e) // inf, snan, qnan
-    {
-        return (s << 31) | ~(~0 << 8) << 23| (m << 13);
-    }
-
-    return (s << 31) | ((e - 15 + 127) << 23) | (m << 13); // norm
-}
-
-
-static U16 Convert_Float_To_Half(float f)
-{
-    // 1s5e10m -> 1s8e23m
-    const U32 iFloat = *(U32*)&f; // Convert float to U32
-
-    if (f != f)
-    {
-        return (U16)(iFloat | HLF_QNaN_BITZS); // +QNaN, -QNaN
-    }
-    else if (f < -HLF_MAX)
-    {
-        return HLF_MAX_BITS_NEG;
-    }
-    else if (HLF_MAX < f)
-    {
-        return HLF_MAX_BITS;
-    }
-    else if (-HLF_MIN < f && f < HLF_MIN)
-    {
-        return (U16)((iFloat >> 16) & 0x8000); // +0, -0
-    }
-
-    // Cut-and-paste from C++, introduce scope so we can decl more vars
-    {
-    const U32 s = (iFloat >> 31) & 0x00000001;
-    const U32 e = (iFloat >> 23) & 0x000000ff;
-    const U32 m = (iFloat >>  0) & 0x007fffff;
-
-    return (U16) ((s << 15) | ((e - 127 + 15) << 10) | (m >> 13));
-    }
-}
-
 
 ERR RGBA64Half_RGBA128Float(PKFormatConverter* pFC, const PKRect* pRect, U8* pb, U32 cbStride)
 {
@@ -1389,6 +1429,647 @@ ERR BGRA32_RGBA32(PKFormatConverter* pFC, const PKRect* pRect, U8* pb, U32 cbStr
 }
 
 
+ERR BlackWhite_Gray8(PKFormatConverter* pFC, const PKRect* pRect, U8* pb, U32 cbStride)
+{
+    const I32 iHeight = pRect->Height;
+    const I32 iWidth = pRect->Width;
+	Bool bBlackWhite = pFC->pDecoder->WMP.wmiSCP.bBlackWhite;
+    I32 y;
+
+    // Stride is assumed to be same for src/dst
+    for (y = iHeight - 1; y >= 0; y--)
+    {
+        I32 x;
+		I32 n;
+        U8 *piDstPixel = (pb + cbStride*y);
+        const U8 *piSrcPixel = (U8*)piDstPixel;
+
+		if (iWidth % 8 != 0)
+		{
+			const U8 v = piSrcPixel[iWidth / 8];
+
+			for (n = 0; n < iWidth % 8; n++)
+			{
+				piDstPixel[iWidth/8*8+n] = (((v >> (7 - n)) & 0x1) != 0) ^ bBlackWhite ? 0xFF : 0x00;
+			}
+		}
+
+        for (x = iWidth / 8 - 1; x >= 0; x--)
+        {
+            const U8 v = piSrcPixel[x];
+
+			for (n = 0; n < 8; n++)
+			{
+                piDstPixel[8*x+n] = (((v >> (7 - n)) & 0x1) != 0) ^ bBlackWhite ? 0xFF : 0x00;
+			}
+        }
+    }
+    
+    return WMP_errSuccess;
+}
+
+
+ERR Gray16_Gray8(PKFormatConverter* pFC, const PKRect* pRect, U8* pb, U32 cbStride)
+{
+    I32 i = 0, j = 0, k = 0;
+
+    UNREFERENCED_PARAMETER( pFC );
+    
+    for (i = 0; i < pRect->Height; ++i)
+    {
+        for (j = 0; j < pRect->Width; ++j)
+        {
+            U16 v = ((U16*)pb)[j];
+            
+            pb[j] = v >> 8;
+        }
+
+        pb += cbStride;
+    }
+
+    return WMP_errSuccess;
+}
+
+ERR RGB48_RGB24(PKFormatConverter* pFC, const PKRect* pRect, U8* pb, U32 cbStride)
+{
+    const I32 iHeight = pRect->Height;
+    const I32 iWidth = pRect->Width;
+    I32 y;
+
+    UNREFERENCED_PARAMETER( pFC );
+
+    // Stride is assumed to be same for src/dst
+    for (y = 0; y < iHeight; y++)
+    {
+        I32 x;
+        U8 *piDstPixel = (U8*)(pb + cbStride*y);
+        const U16 *piSrcPixel = (U16*)piDstPixel;
+
+        for (x = 0; x < iWidth; x++)
+        {
+            const U16 r = piSrcPixel[3*x];
+            const U16 g = piSrcPixel[3*x+1];
+            const U16 b = piSrcPixel[3*x+2];
+
+            piDstPixel[3*x] = r >> 8;
+            piDstPixel[3*x+1] = g >> 8;
+            piDstPixel[3*x+2] = b >> 8;
+        }
+    }
+
+    return WMP_errSuccess;
+}
+
+ERR RGBA64_RGBA32(PKFormatConverter* pFC, const PKRect* pRect, U8* pb, U32 cbStride)
+{
+    const I32 iHeight = pRect->Height;
+    const I32 iWidth = pRect->Width;
+    I32 y;
+
+    UNREFERENCED_PARAMETER( pFC );
+
+    // Stride is assumed to be same for src/dst
+    for (y = 0; y < iHeight; y++)
+    {
+        I32 x;
+        U8 *piDstPixel = (U8*)(pb + cbStride*y);
+        const U16 *piSrcPixel = (U16*)piDstPixel;
+
+        for (x = 0; x < iWidth; x++)
+        {
+            const U16 r = piSrcPixel[4*x];
+            const U16 g = piSrcPixel[4*x+1];
+            const U16 b = piSrcPixel[4*x+2];
+            const U16 a = piSrcPixel[4*x+3];
+
+            piDstPixel[4*x] = r >> 8;
+            piDstPixel[4*x+1] = g >> 8;
+            piDstPixel[4*x+2] = b >> 8;
+            piDstPixel[4*x+3] = a >> 8;
+        }
+    }
+
+    return WMP_errSuccess;
+}
+
+ERR Gray32Float_Gray8(PKFormatConverter* pFC, const PKRect* pRect, U8* pb, U32 cbStride)
+{
+    const I32 iHeight = pRect->Height;
+    const I32 iWidth = pRect->Width;
+    I32 y;
+
+    UNREFERENCED_PARAMETER( pFC );
+
+    // Stride is assumed to be same for src/dst
+    for (y = 0; y < iHeight; y++)
+    {
+        I32 x;
+        U8 *piDstPixel = (U8*)(pb + cbStride*y);
+        const float *piSrcPixel = (float*)piDstPixel;
+
+        for (x = 0; x < iWidth; x++)
+        {
+            const float v = piSrcPixel[x];
+                
+            piDstPixel[x] = Convert_Float_To_U8(v);
+        }
+    }
+
+    return WMP_errSuccess;
+}
+
+ERR RGB96Float_RGB24(PKFormatConverter* pFC, const PKRect* pRect, U8* pb, U32 cbStride)
+{
+    const I32 iHeight = pRect->Height;
+    const I32 iWidth = pRect->Width;
+    I32 y;
+
+    UNREFERENCED_PARAMETER( pFC );
+
+    // Stride is assumed to be same for src/dst
+    for (y = 0; y < iHeight; y++)
+    {
+        I32 x;
+        U8 *piDstPixel = (U8*)(pb + cbStride*y);
+        const float *piSrcPixel = (float*)piDstPixel;
+
+        for (x = 0; x < iWidth; x++)
+        {
+            const float r = piSrcPixel[3*x];
+            const float g = piSrcPixel[3*x+1];
+            const float b = piSrcPixel[3*x+2];
+                
+            piDstPixel[3*x] = Convert_Float_To_U8(r);
+            piDstPixel[3*x+1] = Convert_Float_To_U8(g);
+            piDstPixel[3*x+2] = Convert_Float_To_U8(b);
+        }
+    }
+
+    return WMP_errSuccess;
+}
+
+ERR RGB128Float_RGB24(PKFormatConverter* pFC, const PKRect* pRect, U8* pb, U32 cbStride)
+{
+    const I32 iHeight = pRect->Height;
+    const I32 iWidth = pRect->Width;
+    I32 y;
+
+    UNREFERENCED_PARAMETER( pFC );
+
+    // Stride is assumed to be same for src/dst
+    for (y = 0; y < iHeight; y++)
+    {
+        I32 x;
+        U8 *piDstPixel = (U8*)(pb + cbStride*y);
+        const float *piSrcPixel = (float*)piDstPixel;
+
+        for (x = 0; x < iWidth; x++)
+        {
+            const float r = piSrcPixel[4*x];
+            const float g = piSrcPixel[4*x+1];
+            const float b = piSrcPixel[4*x+2];
+                
+            piDstPixel[3*x] = Convert_Float_To_U8(r);
+            piDstPixel[3*x+1] = Convert_Float_To_U8(g);
+            piDstPixel[3*x+2] = Convert_Float_To_U8(b);
+        }
+    }
+
+    return WMP_errSuccess;
+}
+
+ERR RGBA128Float_RGBA32(PKFormatConverter* pFC, const PKRect* pRect, U8* pb, U32 cbStride)
+{
+    const I32 iHeight = pRect->Height;
+    const I32 iWidth = pRect->Width;
+    I32 y;
+
+    UNREFERENCED_PARAMETER( pFC );
+
+    // Stride is assumed to be same for src/dst
+    for (y = 0; y < iHeight; y++)
+    {
+        I32 x;
+        U8 *piDstPixel = (U8*)(pb + cbStride*y);
+        const float *piSrcPixel = (float*)piDstPixel;
+
+        for (x = 0; x < iWidth; x++)
+        {
+            const float r = piSrcPixel[4*x];
+            const float g = piSrcPixel[4*x+1];
+            const float b = piSrcPixel[4*x+2];
+            const float a = piSrcPixel[4*x+3];
+                
+            piDstPixel[4*x] = Convert_Float_To_U8(r);
+            piDstPixel[4*x+1] = Convert_Float_To_U8(g);
+            piDstPixel[4*x+2] = Convert_Float_To_U8(b);
+            piDstPixel[4*x+3] = Convert_AlphaFloat_To_U8(a);
+        }
+    }
+
+    return WMP_errSuccess;
+}
+
+ERR Gray16Fixed_Gray8(PKFormatConverter* pFC, const PKRect* pRect, U8* pb, U32 cbStride)
+{
+    const I32 iHeight = pRect->Height;
+    const I32 iWidth = pRect->Width;
+    const float fltCvtFactor = 1.0F / (1 << 13);
+    I32 y;
+
+    UNREFERENCED_PARAMETER( pFC );
+
+    // Stride is assumed to be same for src/dst
+    for (y = 0; y < iHeight; y++)
+    {
+        I32 x;
+        U8 *piDstPixel = (U8*)(pb + cbStride*y);
+        const I16 *piSrcPixel = (I16*)piDstPixel;
+
+        for (x = 0; x < iWidth; x++)
+        {
+            piDstPixel[x] = Convert_Float_To_U8(piSrcPixel[x] * fltCvtFactor);
+        }
+    }
+
+    return WMP_errSuccess;
+}
+
+ERR Gray32Fixed_Gray8(PKFormatConverter* pFC, const PKRect* pRect, U8* pb, U32 cbStride)
+{
+    const I32 iHeight = pRect->Height;
+    const I32 iWidth = pRect->Width;
+    const float fltCvtFactor = 1.0F / (1 << 24);
+    I32 y;
+
+    UNREFERENCED_PARAMETER( pFC );
+
+    // Stride is assumed to be same for src/dst
+    for (y = 0; y < iHeight; y++)
+    {
+        I32 x;
+        U8 *piDstPixel = (U8*)(pb + cbStride*y);
+        const I32 *piSrcPixel = (I32*)piDstPixel;
+
+        for (x = 0; x < iWidth; x++)
+        {
+            piDstPixel[x] = Convert_Float_To_U8(piSrcPixel[x] * fltCvtFactor);
+        }
+    }
+
+    return WMP_errSuccess;
+}
+
+ERR RGB48Fixed_RGB24(PKFormatConverter* pFC, const PKRect* pRect, U8* pb, U32 cbStride)
+{
+    const I32 iHeight = pRect->Height;
+    const I32 iWidth = pRect->Width;
+    const float fltCvtFactor = 1.0F / (1 << 13);
+    I32 y;
+
+    UNREFERENCED_PARAMETER( pFC );
+
+    for (y = 0; y < iHeight; y++)
+    {
+        I32 x;
+        U8 *pfltDstPixel = (U8*)(pb + cbStride*y);
+        const I16 *piSrcPixel = (I16*)pfltDstPixel;
+
+        for (x = 0; x < iWidth; x++)
+        {
+            pfltDstPixel[3*x] = Convert_Float_To_U8(piSrcPixel[3*x] * fltCvtFactor);
+            pfltDstPixel[3*x+1] = Convert_Float_To_U8(piSrcPixel[3*x+1] * fltCvtFactor);
+            pfltDstPixel[3*x+2] = Convert_Float_To_U8(piSrcPixel[3*x+2] * fltCvtFactor);
+        }
+    }
+    
+    return WMP_errSuccess;
+}
+
+ERR RGB64Fixed_RGB24(PKFormatConverter* pFC, const PKRect* pRect, U8* pb, U32 cbStride)
+{
+    const I32 iHeight = pRect->Height;
+    const I32 iWidth = pRect->Width;
+    const float fltCvtFactor = 1.0F / (1 << 13);
+    I32 y;
+
+    UNREFERENCED_PARAMETER( pFC );
+
+    for (y = 0; y < iHeight; y++)
+    {
+        I32 x;
+        U8 *pfltDstPixel = (U8*)(pb + cbStride*y);
+        const I16 *piSrcPixel = (I16*)pfltDstPixel;
+
+        for (x = 0; x < iWidth; x++)
+        {
+            pfltDstPixel[3*x] = Convert_Float_To_U8(piSrcPixel[4*x] * fltCvtFactor);
+            pfltDstPixel[3*x+1] = Convert_Float_To_U8(piSrcPixel[4*x+1] * fltCvtFactor);
+            pfltDstPixel[3*x+2] = Convert_Float_To_U8(piSrcPixel[4*x+2] * fltCvtFactor);
+        }
+    }
+    
+    return WMP_errSuccess;
+}
+
+ERR RGB96Fixed_RGB24(PKFormatConverter* pFC, const PKRect* pRect, U8* pb, U32 cbStride)
+{
+    const I32 iHeight = pRect->Height;
+    const I32 iWidth = pRect->Width;
+    const float fltCvtFactor = 1.0F / (1 << 24);
+    I32 y;
+
+    UNREFERENCED_PARAMETER( pFC );
+
+    for (y = 0; y < iHeight; y++)
+    {
+        I32 x;
+        U8 *pfltDstPixel = (U8*)(pb + cbStride*y);
+        const I32 *piSrcPixel = (I32*)pfltDstPixel;
+
+        for (x = 0; x < iWidth; x++)
+        {
+            pfltDstPixel[3*x] = Convert_Float_To_U8(piSrcPixel[3*x] * fltCvtFactor);
+            pfltDstPixel[3*x+1] = Convert_Float_To_U8(piSrcPixel[3*x+1] * fltCvtFactor);
+            pfltDstPixel[3*x+2] = Convert_Float_To_U8(piSrcPixel[3*x+2] * fltCvtFactor);
+        }
+    }
+    
+    return WMP_errSuccess;
+}
+
+ERR RGB128Fixed_RGB24(PKFormatConverter* pFC, const PKRect* pRect, U8* pb, U32 cbStride)
+{
+    const I32 iHeight = pRect->Height;
+    const I32 iWidth = pRect->Width;
+    const float fltCvtFactor = 1.0F / (1 << 24);
+    I32 y;
+
+    UNREFERENCED_PARAMETER( pFC );
+
+    for (y = 0; y < iHeight; y++)
+    {
+        I32 x;
+        U8 *pfltDstPixel = (U8*)(pb + cbStride*y);
+        const I32 *piSrcPixel = (I32*)pfltDstPixel;
+
+        for (x = 0; x < iWidth; x++)
+        {
+            pfltDstPixel[3*x] = Convert_Float_To_U8(piSrcPixel[4*x] * fltCvtFactor);
+            pfltDstPixel[3*x+1] = Convert_Float_To_U8(piSrcPixel[4*x+1] * fltCvtFactor);
+            pfltDstPixel[3*x+2] = Convert_Float_To_U8(piSrcPixel[4*x+2] * fltCvtFactor);
+        }
+    }
+    
+    return WMP_errSuccess;
+}
+
+ERR RGBA64Fixed_RGBA32(PKFormatConverter* pFC, const PKRect* pRect, U8* pb, U32 cbStride)
+{
+    const I32 iHeight = pRect->Height;
+    const I32 iWidth = pRect->Width;
+    const float fltCvtFactor = 1.0F / (1 << 13);
+    I32 y;
+
+    UNREFERENCED_PARAMETER( pFC );
+
+    for (y = 0; y < iHeight; y++)
+    {
+        I32 x;
+        U8 *pfltDstPixel = (U8*)(pb + cbStride*y);
+        const I16 *piSrcPixel = (I16*)pfltDstPixel;
+
+        for (x = 0; x < iWidth; x++)
+        {
+            pfltDstPixel[4*x] = Convert_Float_To_U8(piSrcPixel[4*x] * fltCvtFactor);
+            pfltDstPixel[4*x+1] = Convert_Float_To_U8(piSrcPixel[4*x+1] * fltCvtFactor);
+            pfltDstPixel[4*x+2] = Convert_Float_To_U8(piSrcPixel[4*x+2] * fltCvtFactor);
+            pfltDstPixel[4*x+3] = Convert_AlphaFloat_To_U8(piSrcPixel[4*x+3] * fltCvtFactor);
+        }
+    }
+    
+    return WMP_errSuccess;
+}
+
+ERR RGBA128Fixed_RGBA32(PKFormatConverter* pFC, const PKRect* pRect, U8* pb, U32 cbStride)
+{
+    const I32 iHeight = pRect->Height;
+    const I32 iWidth = pRect->Width;
+    const float fltCvtFactor = 1.0F / (1 << 24);
+    I32 y;
+
+    UNREFERENCED_PARAMETER( pFC );
+
+    for (y = 0; y < iHeight; y++)
+    {
+        I32 x;
+        U8 *pfltDstPixel = (U8*)(pb + cbStride*y);
+        const I32 *piSrcPixel = (I32*)pfltDstPixel;
+
+        for (x = 0; x < iWidth; x++)
+        {
+            pfltDstPixel[4*x] = Convert_Float_To_U8(piSrcPixel[4*x] * fltCvtFactor);
+            pfltDstPixel[4*x+1] = Convert_Float_To_U8(piSrcPixel[4*x+1] * fltCvtFactor);
+            pfltDstPixel[4*x+2] = Convert_Float_To_U8(piSrcPixel[4*x+2] * fltCvtFactor);
+            pfltDstPixel[4*x+3] = Convert_AlphaFloat_To_U8(piSrcPixel[4*x+3] * fltCvtFactor);
+        }
+    }
+    
+    return WMP_errSuccess;
+}
+
+ERR Gray16Half_Gray8(PKFormatConverter* pFC, const PKRect* pRect, U8* pb, U32 cbStride)
+{
+    const I32 iHeight = pRect->Height;
+    const I32 iWidth = pRect->Width;
+    I32 y;
+
+    UNREFERENCED_PARAMETER( pFC );
+
+    // Stride is assumed to be same for src/dst
+    for (y = 0; y < iHeight; y++)
+    {
+        I32 x;
+        U8 *piDstPixel = (U8*)(pb + cbStride*y);
+        const U16 *piSrcPixel = (U16*)piDstPixel;
+
+        for (x = 0; x < iWidth; x++)
+        {
+            const U32 v = Convert_Half_To_Float(piSrcPixel[x]);
+                
+            piDstPixel[x] = Convert_Float_To_U8(*(float*)&v);
+        }
+    }
+
+    return WMP_errSuccess;
+}
+
+ERR RGB48Half_RGB24(PKFormatConverter* pFC, const PKRect* pRect, U8* pb, U32 cbStride)
+{
+    const I32 iHeight = pRect->Height;
+    const I32 iWidth = pRect->Width;
+    I32 y;
+
+    UNREFERENCED_PARAMETER( pFC );
+
+    for (y = 0; y < iHeight; y++)
+    {
+        I32 x;
+        U8 *pfltDstPixel = (U8*)(pb + cbStride*y);
+        const U16 *piSrcPixel = (U16*)pfltDstPixel;
+
+        for (x = 0; x < iWidth; x++)
+        {
+            const U32 r = Convert_Half_To_Float(piSrcPixel[3*x]);
+            const U32 g = Convert_Half_To_Float(piSrcPixel[3*x+1]);
+            const U32 b = Convert_Half_To_Float(piSrcPixel[3*x+2]);
+        
+            pfltDstPixel[3*x] = Convert_Float_To_U8(*(float*)&r);
+            pfltDstPixel[3*x+1] = Convert_Float_To_U8(*(float*)&g);
+            pfltDstPixel[3*x+2] = Convert_Float_To_U8(*(float*)&b);
+        }
+    }
+    
+    return WMP_errSuccess;
+}
+
+ERR RGB64Half_RGB24(PKFormatConverter* pFC, const PKRect* pRect, U8* pb, U32 cbStride)
+{
+    const I32 iHeight = pRect->Height;
+    const I32 iWidth = pRect->Width;
+    I32 y;
+
+    UNREFERENCED_PARAMETER( pFC );
+
+    for (y = 0; y < iHeight; y++)
+    {
+        I32 x;
+        U8 *pfltDstPixel = (U8*)(pb + cbStride*y);
+        const U16 *piSrcPixel = (U16*)pfltDstPixel;
+
+        for (x = 0; x < iWidth; x++)
+        {
+            const U32 r = Convert_Half_To_Float(piSrcPixel[4*x]);
+            const U32 g = Convert_Half_To_Float(piSrcPixel[4*x+1]);
+            const U32 b = Convert_Half_To_Float(piSrcPixel[4*x+2]);
+        
+            pfltDstPixel[3*x] = Convert_Float_To_U8(*(float*)&r);
+            pfltDstPixel[3*x+1] = Convert_Float_To_U8(*(float*)&g);
+            pfltDstPixel[3*x+2] = Convert_Float_To_U8(*(float*)&b);
+        }
+    }
+    
+    return WMP_errSuccess;
+}
+
+ERR RGBA64Half_RGBA32(PKFormatConverter* pFC, const PKRect* pRect, U8* pb, U32 cbStride)
+{
+    const I32 iHeight = pRect->Height;
+    const I32 iWidth = pRect->Width;
+    I32 y;
+
+    UNREFERENCED_PARAMETER( pFC );
+
+    for (y = 0; y < iHeight; y++)
+    {
+        I32 x;
+        U8 *pfltDstPixel = (U8*)(pb + cbStride*y);
+        const U16 *piSrcPixel = (U16*)pfltDstPixel;
+
+        for (x = 0; x < iWidth; x++)
+        {
+            const U32 r = Convert_Half_To_Float(piSrcPixel[4*x]);
+            const U32 g = Convert_Half_To_Float(piSrcPixel[4*x+1]);
+            const U32 b = Convert_Half_To_Float(piSrcPixel[4*x+2]);
+            const U32 a = Convert_Half_To_Float(piSrcPixel[4*x+3]);
+        
+            pfltDstPixel[4*x] = Convert_Float_To_U8(*(float*)&r);
+            pfltDstPixel[4*x+1] = Convert_Float_To_U8(*(float*)&g);
+            pfltDstPixel[4*x+2] = Convert_Float_To_U8(*(float*)&b);
+            pfltDstPixel[4*x+3] = Convert_AlphaFloat_To_U8(*(float*)&a);
+        }
+    }
+    
+    return WMP_errSuccess;
+}
+
+ERR RGB101010_RGB24(PKFormatConverter* pFC, const PKRect* pRect, U8* pb, U32 cbStride)
+{
+    const I32 iHeight = pRect->Height;
+    const I32 iWidth = pRect->Width;
+    I32 y;
+
+    UNREFERENCED_PARAMETER( pFC );
+
+    // Stride is assumed to be same for src/dst
+    for (y = 0; y < iHeight; y++)
+    {
+        I32 x;
+        U8 *piDstPixel = (U8*)(pb + cbStride*y);
+        const U32 *piSrcPixel = (U32*)piDstPixel;
+
+        for (x = 0; x < iWidth; x++)
+        {
+            const U32 v = piSrcPixel[x];
+            const unsigned int r = ((v >> 20) & 0x3FF);
+            const unsigned int g = ((v >> 10) & 0x3FF);
+            const unsigned int b = (v & 0x3FF);
+
+            piDstPixel[3*x] = r >> 2;
+            piDstPixel[3*x+1] = g >> 2;
+            piDstPixel[3*x+2] = b >> 2;
+        }
+    }
+
+    return WMP_errSuccess;
+}
+
+ERR RGBE_RGB24(PKFormatConverter* pFC, const PKRect* pRect, U8* pb, U32 cbStride)
+{
+    I32 i = 0, j = 0;
+
+    UNREFERENCED_PARAMETER( pFC );
+   
+    for (i = 0; i < pRect->Height; ++i)
+    {
+        for (j = 0; j < pRect->Width; j++)
+        {
+            // First read the exponent
+            const U8 rawExp = pb[4*j+3];
+
+            if (0 == rawExp)
+            {
+                pb[3*j] = 0;
+                pb[3*j+1] = 0;
+                pb[3*j+2] = 0;
+            }
+            else
+            {
+                const I32 adjExp = (I32)rawExp - 128 - 8; // Can be negative
+                float fltExp;
+
+                if (adjExp > -32 && adjExp < 32)
+                {
+                    fltExp = (float) (((U32)1) << abs(adjExp));
+                    if (adjExp < 0)
+                        fltExp = 1.0F / fltExp;
+                }
+                else
+                {
+                    fltExp = (float)ldexp(1.0F, adjExp);
+                }
+
+                pb[3*j] = Convert_Float_To_U8(pb[4*j] * fltExp);
+                pb[3*j + 1] = Convert_Float_To_U8(pb[4*j + 1] * fltExp);
+                pb[3*j + 2] = Convert_Float_To_U8(pb[4*j + 2] * fltExp);
+            }
+        }
+
+        pb += cbStride;
+    }
+
+    return WMP_errSuccess;
+}
 
 //================================================================
 typedef struct tagPKPixelConverterInfo
@@ -1459,6 +2140,30 @@ static PKPixelConverterInfo s_pcInfo[] = {
     {&GUID_PKPixelFormat32bppBGRA, &GUID_PKPixelFormat32bppRGBA, BGRA32_RGBA32}, // Rev
     {&GUID_PKPixelFormat32bppPRGBA, &GUID_PKPixelFormat32bppPBGRA, RGBA32_BGRA32}, // Fwd
     {&GUID_PKPixelFormat32bppPBGRA, &GUID_PKPixelFormat32bppPRGBA, BGRA32_RGBA32}, // Rev
+
+	// conversions to 8bppGray / 24bppRGB / 32bppRGBA
+	{&GUID_PKPixelFormatBlackWhite, &GUID_PKPixelFormat8bppGray, BlackWhite_Gray8},
+    {&GUID_PKPixelFormat16bppGray, &GUID_PKPixelFormat8bppGray, Gray16_Gray8},
+    {&GUID_PKPixelFormat48bppRGB, &GUID_PKPixelFormat24bppRGB, RGB48_RGB24},
+    {&GUID_PKPixelFormat64bppRGBA, &GUID_PKPixelFormat32bppRGBA, RGBA64_RGBA32},
+    {&GUID_PKPixelFormat32bppGrayFloat, &GUID_PKPixelFormat8bppGray, Gray32Float_Gray8},     
+    {&GUID_PKPixelFormat96bppRGBFloat, &GUID_PKPixelFormat24bppRGB, RGB96Float_RGB24},
+    {&GUID_PKPixelFormat128bppRGBFloat, &GUID_PKPixelFormat24bppRGB, RGB128Float_RGB24},
+    {&GUID_PKPixelFormat128bppRGBAFloat, &GUID_PKPixelFormat32bppRGBA, RGBA128Float_RGBA32},
+    {&GUID_PKPixelFormat16bppGrayFixedPoint, &GUID_PKPixelFormat8bppGray, Gray16Fixed_Gray8}, 
+    {&GUID_PKPixelFormat32bppGrayFixedPoint, &GUID_PKPixelFormat8bppGray, Gray32Fixed_Gray8},  
+    {&GUID_PKPixelFormat48bppRGBFixedPoint, &GUID_PKPixelFormat24bppRGB, RGB48Fixed_RGB24},
+    {&GUID_PKPixelFormat64bppRGBFixedPoint, &GUID_PKPixelFormat24bppRGB, RGB64Fixed_RGB24},
+    {&GUID_PKPixelFormat96bppRGBFixedPoint, &GUID_PKPixelFormat24bppRGB, RGB96Fixed_RGB24},
+    {&GUID_PKPixelFormat128bppRGBFixedPoint, &GUID_PKPixelFormat24bppRGB, RGB128Fixed_RGB24},   
+    {&GUID_PKPixelFormat64bppRGBAFixedPoint, &GUID_PKPixelFormat32bppRGBA, RGBA64Fixed_RGBA32},
+    {&GUID_PKPixelFormat128bppRGBAFixedPoint, &GUID_PKPixelFormat32bppRGBA, RGBA128Fixed_RGBA32},    
+    {&GUID_PKPixelFormat16bppGrayHalf, &GUID_PKPixelFormat8bppGray, Gray16Half_Gray8},     
+    {&GUID_PKPixelFormat48bppRGBHalf, &GUID_PKPixelFormat24bppRGB, RGB48Half_RGB24},
+    {&GUID_PKPixelFormat64bppRGBHalf, &GUID_PKPixelFormat24bppRGB, RGB64Half_RGB24},
+    {&GUID_PKPixelFormat64bppRGBAHalf, &GUID_PKPixelFormat32bppRGBA, RGBA64Half_RGBA32},
+    {&GUID_PKPixelFormat32bppRGB101010, &GUID_PKPixelFormat24bppRGB, RGB101010_RGB24},    
+    {&GUID_PKPixelFormat32bppRGBE, &GUID_PKPixelFormat24bppRGB, RGBE_RGB24}
 };
 
 /* auxiliary data structure and hack to support valid encoding from/to configurations that 
