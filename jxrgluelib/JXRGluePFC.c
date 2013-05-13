@@ -1471,7 +1471,7 @@ ERR BlackWhite_Gray8(PKFormatConverter* pFC, const PKRect* pRect, U8* pb, U32 cb
 
 ERR Gray16_Gray8(PKFormatConverter* pFC, const PKRect* pRect, U8* pb, U32 cbStride)
 {
-    I32 i = 0, j = 0, k = 0;
+    I32 i = 0, j = 0;
 
     UNREFERENCED_PARAMETER( pFC );
     
@@ -2015,9 +2015,9 @@ ERR RGB101010_RGB24(PKFormatConverter* pFC, const PKRect* pRect, U8* pb, U32 cbS
             const unsigned int g = ((v >> 10) & 0x3FF);
             const unsigned int b = (v & 0x3FF);
 
-            piDstPixel[3*x] = r >> 2;
-            piDstPixel[3*x+1] = g >> 2;
-            piDstPixel[3*x+2] = b >> 2;
+            piDstPixel[3*x] = (U8) (r >> 2);
+            piDstPixel[3*x+1] = (U8) (g >> 2);
+            piDstPixel[3*x+2] = (U8) (b >> 2);
         }
     }
 
