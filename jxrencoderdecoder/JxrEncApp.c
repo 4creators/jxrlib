@@ -43,6 +43,7 @@ typedef struct tagWMPENCAPPARGS
     CWMIStrCodecParam wmiSCP;
     float fltImageQuality;
     Bool bOverlapSet;
+    Bool bColorFormatSet;
 } WMPENCAPPARGS;
 
 //----------------------------------------------------------------
@@ -123,11 +124,13 @@ void WmpEncAppUsage(const char* szExe)
     printf("                               1: YCoCg 4:2:0" CRLF);
     printf("                               2: YCoCg 4:2:2" CRLF);
     printf("                               3: YCoCg 4:4:4 (default)" CRLF);
+    printf("     (if not set is 4:4:4 for quality >= 0.5 or 4:2:0 for quality < 0.5)" CRLF);
     printf(CRLF);
 
     printf("  -l overlapping               0: No overlapping" CRLF);
     printf("                               1: One level overlapping (default)" CRLF);
     printf("                               2: Two level overlapping" CRLF);
+    printf("     (if not set is One for quality > 0.4 or Two for quality <= 0.4)" CRLF);
     printf(CRLF);
 
     printf("  -f                           Turn off frequency order bit stream (to spatial)" CRLF);
@@ -202,7 +205,7 @@ void WmpEncAppInitDefaultArgs(WMPENCAPPARGS* args)
     args->wmiSCP.bdBitDepth = BD_LONG;
     args->wmiSCP.bfBitstreamFormat = FREQUENCY;
     args->wmiSCP.bProgressiveMode = TRUE;
-    args->wmiSCP.olOverlap = OL_NONE;
+    args->wmiSCP.olOverlap = OL_ONE;
     args->wmiSCP.cNumOfSliceMinus1H = args->wmiSCP.cNumOfSliceMinus1V = 0;
     args->wmiSCP.sbSubband = SB_ALL;
     args->wmiSCP.uAlphaMode = 0;
@@ -211,6 +214,7 @@ void WmpEncAppInitDefaultArgs(WMPENCAPPARGS* args)
 
     args->fltImageQuality = 1.f;
     args->bOverlapSet = 0;
+    args->bColorFormatSet = 0;
 }
 
 ERR WmpEncAppValidateArgs(WMPENCAPPARGS* args)
@@ -371,6 +375,7 @@ ERR WmpEncAppParseArgs(int argc, char* argv[], WMPENCAPPARGS* args)
 
                     case 'd':
                         args->wmiSCP.cfColorFormat = (COLORFORMAT)atoi(argv[i]);
+                        args->bColorFormatSet = 1;
                         break;
                     
                     case 'H': // horizontal tiling
@@ -457,6 +462,20 @@ Cleanup:
 
 
 // Y, U, V, YHP, UHP, VHP
+int DPK_QPS_420[12][6] = {      // for 8 bit only
+    { 66, 65, 70, 72, 72, 77 },
+    { 59, 58, 63, 64, 63, 68 },
+    { 52, 51, 57, 56, 56, 61 },
+    { 48, 48, 54, 51, 50, 55 },
+    { 43, 44, 48, 46, 46, 49 },
+    { 37, 37, 42, 38, 38, 43 },
+    { 26, 28, 31, 27, 28, 31 },
+    { 16, 17, 22, 16, 17, 21 },
+    { 10, 11, 13, 10, 10, 13 },
+    {  5,  5,  6,  5,  5,  6 },
+    {  2,  2,  3,  2,  2,  2 }
+};
+
 int DPK_QPS_8[12][6] = {
     { 67, 79, 86, 72, 90, 98 },
     { 59, 74, 80, 64, 83, 89 },
@@ -586,6 +605,9 @@ main(int argc, char* argv[])
         if ((PI.grBit & PK_pixfmtHasAlpha) && args.wmiSCP.uAlphaMode == 0)
             args.wmiSCP.uAlphaMode = 2; // with Alpha and no default, set default as Planar
 
+        FailIf(PI.uSamplePerPixel > 1 && PI.uBitsPerSample > 8 && args.wmiSCP.cfColorFormat != YUV_444,
+            WMP_errInvalidArgument);
+
         //================================
         Call(pCodecFactory->CreateFormatConverter(&pConverter));
         Call(pConverter->Initialize(pConverter, pDecoder, pExt, args.guidPixFormat));
@@ -626,6 +648,14 @@ main(int argc, char* argv[])
 			        pEncoder->WMP.wmiSCP.olOverlap = OL_TWO;
             }
 
+            if (!args.bColorFormatSet)
+            {
+		        if (args.fltImageQuality >= 0.5F)
+			        pEncoder->WMP.wmiSCP.cfColorFormat = YUV_444;
+		        else
+			        pEncoder->WMP.wmiSCP.cfColorFormat = YUV_420;
+            }
+
 		    if (PI.bdBitDepth == BD_1)
 		    {
 			    pEncoder->WMP.wmiSCP.uiDefaultQPIndex = (U8)(8 - 5.0F *
@@ -638,16 +668,19 @@ main(int argc, char* argv[])
                 int qi;
                 float qf;
                 int* pQPs;
-                if (args.fltImageQuality > 0.8f && PI.bdBitDepth == BD_8)
+                if (args.fltImageQuality > 0.8f && PI.bdBitDepth == BD_8 &&
+                    args.wmiSCP.cfColorFormat != YUV_420 && args.wmiSCP.cfColorFormat != YUV_422)
                     args.fltImageQuality = 0.8f + (args.fltImageQuality - 0.8f) * 1.5f;
 
                 qi = (int) (10.f * args.fltImageQuality);
                 qf = 10.f * args.fltImageQuality - (float) qi;
 
                 pQPs =
-                    PI.bdBitDepth == BD_8 ? DPK_QPS_8[qi] :
+                    (args.wmiSCP.cfColorFormat == YUV_420 || args.wmiSCP.cfColorFormat == YUV_422) ?
+                        DPK_QPS_420[qi] :
+                    (PI.bdBitDepth == BD_8 ? DPK_QPS_8[qi] :
                     (PI.bdBitDepth == BD_16 ? DPK_QPS_16[qi] :
-                    ((PI.bdBitDepth == BD_16F ? DPK_QPS_16f[qi] :
+                    (PI.bdBitDepth == BD_16F ? DPK_QPS_16f[qi] :
                     DPK_QPS_32f[qi])));
 
                 pEncoder->WMP.wmiSCP.uiDefaultQPIndex = (U8) (0.5f +
