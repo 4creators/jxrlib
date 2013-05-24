@@ -669,14 +669,16 @@ main(int argc, char* argv[])
                 float qf;
                 int* pQPs;
                 if (args.fltImageQuality > 0.8f && PI.bdBitDepth == BD_8 &&
-                    args.wmiSCP.cfColorFormat != YUV_420 && args.wmiSCP.cfColorFormat != YUV_422)
+                    pEncoder->WMP.wmiSCP.cfColorFormat != YUV_420 &&
+                    pEncoder->WMP.wmiSCP.cfColorFormat != YUV_422)
                     args.fltImageQuality = 0.8f + (args.fltImageQuality - 0.8f) * 1.5f;
 
                 qi = (int) (10.f * args.fltImageQuality);
                 qf = 10.f * args.fltImageQuality - (float) qi;
 
                 pQPs =
-                    (args.wmiSCP.cfColorFormat == YUV_420 || args.wmiSCP.cfColorFormat == YUV_422) ?
+                    (pEncoder->WMP.wmiSCP.cfColorFormat == YUV_420 ||
+                     pEncoder->WMP.wmiSCP.cfColorFormat == YUV_422) ?
                         DPK_QPS_420[qi] :
                     (PI.bdBitDepth == BD_8 ? DPK_QPS_8[qi] :
                     (PI.bdBitDepth == BD_16 ? DPK_QPS_16[qi] :
