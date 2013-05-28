@@ -650,7 +650,7 @@ main(int argc, char* argv[])
 
             if (!args.bColorFormatSet)
             {
-		        if (args.fltImageQuality >= 0.5F)
+		        if (args.fltImageQuality >= 0.5F || PI.uBitsPerSample > 8)
 			        pEncoder->WMP.wmiSCP.cfColorFormat = YUV_444;
 		        else
 			        pEncoder->WMP.wmiSCP.cfColorFormat = YUV_420;
