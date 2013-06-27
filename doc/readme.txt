@@ -28,9 +28,6 @@ file format and compression technology.
 Assuming the installation dir is C:\jxrlib, all the paths mentioned below are 
 relative to this base path.
 
-   The Visual Studio 2010 main solution is:
-   jxrencoderdecoder\JXR.sln
-
    The Visual Studio 2012 main solution is:
    jxrencoderdecoder\JXR_vc11.sln
 
