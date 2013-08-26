@@ -1,5 +1,5 @@
-Microsoft Visual Studio Solution File, Format Version 11.00
-# Visual Studio 2010
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "JXRGlueLib", "..\JXRGlueLib\JXRGlueLib_vc11.vcxproj", "{A69603CC-65E8-443F-8E31-737DBD6BB0DB}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "JXRCommonLib", "..\image\VC11Projects\CommonLib_vc11.vcxproj", "{4B4C055C-170E-4DCF-8F73-BED91BE7CFA4}"
@@ -13,6 +13,10 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "JXREncApp", "JXREncApp_vc11.vcxproj", "{FCC17C5C-51B5-44CA-9D70-6C8384AE86E6}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "JXRTestLib", "..\JXRTestlib\JXRTestLib_vc11.vcxproj", "{A69603CC-65E8-443F-8E31-737DBD6BB0DC}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "JXREnc420", "JXREnc420_vc11.vcxproj", "{CE29E199-10D5-4BC0-B9D7-76580A44FCBE}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "JXRDec420", "JXRDec420_vc11.vcxproj", "{492EF19B-E3F2-4D0F-99FF-FEBC73DD4F7F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -78,6 +82,22 @@ Global
 		{A69603CC-65E8-443F-8E31-737DBD6BB0DC}.Release|Win32.Build.0 = Release|Win32
 		{A69603CC-65E8-443F-8E31-737DBD6BB0DC}.Release|x64.ActiveCfg = Release|x64
 		{A69603CC-65E8-443F-8E31-737DBD6BB0DC}.Release|x64.Build.0 = Release|x64
+		{CE29E199-10D5-4BC0-B9D7-76580A44FCBE}.Debug|Win32.ActiveCfg = Debug|Win32
+		{CE29E199-10D5-4BC0-B9D7-76580A44FCBE}.Debug|Win32.Build.0 = Debug|Win32
+		{CE29E199-10D5-4BC0-B9D7-76580A44FCBE}.Debug|x64.ActiveCfg = Debug|x64
+		{CE29E199-10D5-4BC0-B9D7-76580A44FCBE}.Debug|x64.Build.0 = Debug|x64
+		{CE29E199-10D5-4BC0-B9D7-76580A44FCBE}.Release|Win32.ActiveCfg = Release|Win32
+		{CE29E199-10D5-4BC0-B9D7-76580A44FCBE}.Release|Win32.Build.0 = Release|Win32
+		{CE29E199-10D5-4BC0-B9D7-76580A44FCBE}.Release|x64.ActiveCfg = Release|x64
+		{CE29E199-10D5-4BC0-B9D7-76580A44FCBE}.Release|x64.Build.0 = Release|x64
+		{492EF19B-E3F2-4D0F-99FF-FEBC73DD4F7F}.Debug|Win32.ActiveCfg = Debug|Win32
+		{492EF19B-E3F2-4D0F-99FF-FEBC73DD4F7F}.Debug|Win32.Build.0 = Debug|Win32
+		{492EF19B-E3F2-4D0F-99FF-FEBC73DD4F7F}.Debug|x64.ActiveCfg = Debug|x64
+		{492EF19B-E3F2-4D0F-99FF-FEBC73DD4F7F}.Debug|x64.Build.0 = Debug|x64
+		{492EF19B-E3F2-4D0F-99FF-FEBC73DD4F7F}.Release|Win32.ActiveCfg = Release|Win32
+		{492EF19B-E3F2-4D0F-99FF-FEBC73DD4F7F}.Release|Win32.Build.0 = Release|Win32
+		{492EF19B-E3F2-4D0F-99FF-FEBC73DD4F7F}.Release|x64.ActiveCfg = Release|x64
+		{492EF19B-E3F2-4D0F-99FF-FEBC73DD4F7F}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
