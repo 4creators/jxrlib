@@ -63,6 +63,11 @@ void init_encoder_params(CWMIStrCodecParam& params, int quality_i)
     
         const int *pQPs = DPK_QPS_420[index];
     
+		if (quality >= 0.5F)
+			params.olOverlap = OL_ONE;
+		else
+			params.olOverlap = OL_TWO;
+
         params.uiDefaultQPIndex    = 
             (U8) (0.5f + (float) pQPs[0] * (1.f - frac) + (float) (pQPs + 6)[0] * frac);
         params.uiDefaultQPIndexU   = 
