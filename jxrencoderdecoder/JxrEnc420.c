@@ -27,6 +27,7 @@
 //*@@@---@@@@******************************************************************
 #define _CRT_SECURE_NO_WARNINGS
 #include <JXRTest.h>
+#include <errno.h>
 
 // optimized for PSNR
 const int QP_TAB_SIZE = 11;
@@ -49,7 +50,7 @@ void init_encoder_params(CWMIStrCodecParam* params, int quality_i)
 {
     memset(params, 0, sizeof(*params));
 
-    params->bYUVData = true;
+    params->bYUVData = TRUE;
     params->cfColorFormat = YUV_420;
     params->bdBitDepth    = BD_LONG;
 

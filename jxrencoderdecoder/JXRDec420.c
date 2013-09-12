@@ -27,6 +27,7 @@
 //*@@@---@@@@******************************************************************
 #define _CRT_SECURE_NO_WARNINGS
 #include <JXRTest.h>
+#include <errno.h>
 
 inline unsigned char clip_c(int v)
 {
@@ -118,7 +119,7 @@ main(int argc, char* argv[])
         rc.Width  = width;
         rc.Height = height;
     
-        pDecoder->WMP.wmiSCP.bYUVData = true;
+        pDecoder->WMP.wmiSCP.bYUVData = TRUE;
         
         decode_buffer = (int*)malloc(4*yuv_size);
         Call( pDecoder->Copy(pDecoder, &rc, (U8*)decode_buffer, width*3*4) );
