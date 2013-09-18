@@ -29,39 +29,6 @@
 #include <JXRTest.h>
 #include <errno.h>
 
-inline unsigned char clip_c(int v)
-{
-	if( v > 255 )    return 255;
-	else if( v < 0 ) return 0;
-	else             return (unsigned char)v;
-}
-
-void
-unpack_yuv(unsigned char* dest_buffer, int* decode_buffer, int width, int height)
-{
-    unsigned char* yps0 = dest_buffer;
-    unsigned char* yps1 = dest_buffer+width;
-    unsigned char* ups  = dest_buffer+width*height;
-    unsigned char* vps  = ups + (width>>1)*(height>>1);
-
-    int* dp = decode_buffer;
-
-    // JXR decoder generates Y00 Y10 Y01 Y11 U0 V0 packed and as signed integers
-	int x, y;
-    for( y = 0; y < height; y+=2 ) {
-        for( x = 0; x < width; x+=2, dp+=6, yps0+=2, yps1+=2, ups++, vps++) {
-            *(yps0+0) = clip_c((dp[0] >> 3) + 128);
-            *(yps0+1) = clip_c((dp[1] >> 3) + 128);
-            *(yps1+0) = clip_c((dp[2] >> 3) + 128);
-            *(yps1+1) = clip_c((dp[3] >> 3) + 128);
-            *ups      = clip_c((dp[4] >> 3) + 128);
-            *vps      = clip_c((dp[5] >> 3) + 128);
-        }
-        yps0 += width;
-        yps1 += width;
-    }
-}
-
 //================================================================
 // main function
 //================================================================
@@ -80,7 +47,6 @@ main(int argc, char* argv[])
 
     errno = 0;
 
-    /* Will check these for validity when opening via 'fopen'. */
     const char *jxr_path = argv[1];
     const char *yuv_path = argv[2];
 
@@ -92,12 +58,21 @@ main(int argc, char* argv[])
         ERR err = WMP_errSuccess;
 
         int width, height;
+        PKFactory*      pFactory      = NULL;
         PKCodecFactory* pCodecFactory = NULL;
         PKImageDecode*  pDecoder      = NULL;
-        int* decode_buffer            = NULL;
+        const PKIID*    pIID          = NULL;
+        PKImageEncode*  pEncoder      = NULL;
+        struct WMPStream* pEncodeStream = NULL;
+
+        Call( PKCreateFactory(&pFactory, PK_SDK_VERSION) );
+        Call( pFactory->CreateStreamFromFilename(&pEncodeStream, yuv_path, "wb") );
 
         Call( PKCreateCodecFactory(&pCodecFactory, WMP_SDK_VERSION) );
         Call( pCodecFactory->CreateDecoderFromFile(jxr_path, &pDecoder) );
+
+        Call( GetTestEncodeIID(".iyuv", &pIID) );
+        Call( PKTestFactory_CreateCodec(pIID, (void **) &pEncoder) );
         
         // check that pixel format is YCC 4:2:0
         PKPixelFormatGUID pix_frmt;
@@ -119,33 +94,26 @@ main(int argc, char* argv[])
         rc.Width  = width;
         rc.Height = height;
     
-        pDecoder->WMP.wmiSCP.bYUVData = TRUE;
-        
-        decode_buffer = (int*)malloc(4*yuv_size);
-        Call( pDecoder->Copy(pDecoder, &rc, (U8*)decode_buffer, width*3*4) );
-    
-        // unpack the decoded result
-        image_buffer = (unsigned char*)malloc(width*height+2*(width>>1)*(height>>1));
-        unpack_yuv(image_buffer, decode_buffer, width, height);
+        image_buffer = (U8*)malloc(yuv_size);
+        Call( pDecoder->Copy(pDecoder, &rc, (U8*)image_buffer, width*3) );
 
+        // write the decoded result
+        Call( pEncoder->Initialize(pEncoder, pEncodeStream, NULL, 0) );
+        Call( pEncoder->SetPixelFormat(pEncoder, pix_frmt));
+        Call( pEncoder->SetSize(pEncoder, width, height));
+        Call( pEncoder->WritePixels(pEncoder, height, image_buffer, width) );
+    
     Cleanup:
         if( pDecoder )      pDecoder->Release(&pDecoder);
+        if( pEncoder )      pEncoder->Release(&pEncoder);
         if( pCodecFactory ) pCodecFactory->Release(&pCodecFactory);
-        free(decode_buffer);
+        if( pFactory )      pFactory->Release(&pFactory);
         if( err != WMP_errSuccess ) {
             fprintf(stderr, "Failed to decode\n");
             return 1;
         }
     }
 
-    FILE *yuv_fd = fopen(yuv_path, "wb");
-    if (!yuv_fd) {
-        fprintf(stderr, "Invalid path to YUV file!");
-        return 1;
-    }
-
-    fwrite(image_buffer, yuv_size, 1, yuv_fd);
-    fclose(yuv_fd);
     free(image_buffer);
 
     return 0;
