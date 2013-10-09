@@ -3393,10 +3393,6 @@ Int ImageStrDecInit(
     *pSCP = pSC->WMISCP;
     *pctxSC = (CTXSTRCODEC)pSC;
 
-    // original image size
-    pII->cROILeftX += SC.m_param.cExtraPixelsLeft;
-    pII->cROITopY += SC.m_param.cExtraPixelsTop;
-
     if(pSC->WMII.cPostProcStrength){
         initPostProc(pSC->pPostProcInfo, pSC->cmbWidth, pSC->m_param.cNumChannels);
         if (pSC->m_param.bAlphaChannel) 
@@ -3564,8 +3560,10 @@ Int ImageStrDecDecode(
 
         if (pSC->cRow) {
             if(pSC->m_Dparam->cThumbnailScale < 2 && (pSC->m_Dparam->bDecodeFullFrame || 
-                ((pSC->cRow * 16 > pSC->m_Dparam->cROITopY) && (pSC->cRow * 16 <= pSC->m_Dparam->cROIBottomY + 16))))
-                pSC->Load(pSC); // bypass CC for thumbnail decode
+                ((pSC->cRow * 16 > pSC->m_Dparam->cROITopY) && (pSC->cRow * 16 <= pSC->m_Dparam->cROIBottomY + 16)))) {
+                if( pSC->Load(pSC) != ICERR_OK ) // bypass CC for thumbnail decode
+            		return ICERR_ERROR;
+            }
 
             if(pSC->m_Dparam->cThumbnailScale >= 2) // decode thumbnail
                 decodeThumbnail(pSC);

@@ -1983,8 +1983,11 @@ ERR PKImageDecode_Copy_WMP(
             Call(pID->WMP.wmiSCP.pWStream->GetPos(pID->WMP.wmiSCP.pWStream, &(pID->WMP.cMarker)));
             FailIf(ICERR_OK != ImageStrDecInit(&pID->WMP.wmiI, &pID->WMP.wmiSCP, &pID->WMP.ctxSC), WMP_errFail);
         }
-        cMBRow = ((U32) pID->WMP.wmiI.cROITopY + pRect->Y + pRect->Height + linesperMBRow - 1) / linesperMBRow + 1;
-        cMBRowStart = pRect->Y / linesperMBRow + 1;
+        // Re-entrant mode incurs 1 MBR delay, so to get 0th MBR, we have to ask for 1st MBR
+        cMBRow = ((U32) pID->WMP.cLinesCropped + pRect->Y + pRect->Height +          
+            (pRect->Y + pRect->Height >= (I32) pID->WMP.wmiI.cROIHeight ? linesperMBRow - 1 : 0)) / // round up if last MBR
+            linesperMBRow + 1;
+        cMBRowStart = ((U32) pID->WMP.cLinesCropped + pRect->Y) / linesperMBRow + 1;
         // if current request starts before current state, then rewind.
         if (cMBRowStart < pID->WMP.DecoderCurrMBRow) 
         {
@@ -2011,7 +2014,7 @@ ERR PKImageDecode_Copy_WMP(
         }
         else
         {
-            pbLowMemAdj = pb - (pRect->Y - pID->WMP.cLinesCropped) * cbStride;
+            pbLowMemAdj = pb - pRect->Y * cbStride;
         }
         wmiBI.pv = pbLowMemAdj;
 
@@ -2021,22 +2024,28 @@ ERR PKImageDecode_Copy_WMP(
             wmiBI.uiFirstMBRow = i;
             wmiBI.uiLastMBRow = i;
             FailIf(ICERR_OK != ImageStrDecDecode(pID->WMP.ctxSC, &wmiBI, &cLinesDecoded), WMP_errFail);
-            pID->WMP.cLinesDecoded += cLinesDecoded;
+            pID->WMP.cLinesDecoded = cLinesDecoded;
             if (FALSE == pID->WMP.fFirstNonZeroDecode && cLinesDecoded > 0)
             {
                 pID->WMP.cLinesCropped += (linesperMBRow - cLinesDecoded);
                 pID->WMP.fFirstNonZeroDecode = TRUE;
+                // update cMBRow if partial MB row cropped
+                cMBRow = ((U32) pID->WMP.cLinesCropped + pRect->Y + pRect->Height +          
+                    (pRect->Y + pRect->Height >= (I32) pID->WMP.wmiI.cROIHeight ? linesperMBRow - 1 : 0)) / // round up if last MBR
+                    linesperMBRow + 1;
             }
 
-            if (0 == cLinesDecoded && pRect->Y > 0)
+            if (0 == cLinesDecoded && i > 0)
             {
                 pID->WMP.cLinesCropped += linesperMBRow;
+                // update cMBRow if whole MB row cropped
+                cMBRow++;
             }
         }
         wmiBI.pv = pbLowMemAdj;
 
         // If we're past the top of the image, then we're done, so terminate.
-        if (linesperMBRow * (cMBRow - 1) >= pID->WMP.wmiI.cROIHeight) {
+        if (linesperMBRow * (cMBRow - 1) >= (U32) pID->WMP.cLinesCropped + pID->WMP.wmiI.cROIHeight) {
             FailIf(ICERR_OK != ImageStrDecTerm(pID->WMP.ctxSC), WMP_errFail);        
         }
         pID->WMP.DecoderCurrMBRow = cMBRow; // Set to next possible MBRow that is decodable
@@ -2096,8 +2105,11 @@ ERR PKImageDecode_Copy_WMP(
             FailIf(ICERR_OK != ImageStrDecInit(&pID->WMP.wmiI_Alpha, &pID->WMP.wmiSCP_Alpha, &pID->WMP.ctxSC_Alpha), WMP_errFail);
         }
         
-        cMBRow = ((U32) pID->WMP.wmiI.cROITopY + pRect->Y + pRect->Height + linesperMBRow - 1) / linesperMBRow + 1;
-        cMBRowStart = pRect->Y / linesperMBRow + 1;
+        // Re-entrant mode incurs 1 MBR delay, so to get 0th MBR, we have to ask for 1st MBR
+        cMBRow = ((U32) pID->WMP.cLinesCropped + pRect->Y + pRect->Height +          
+            (pRect->Y + pRect->Height >= (I32) pID->WMP.wmiI.cROIHeight ? linesperMBRow - 1 : 0)) / // round up if last MBR
+            linesperMBRow + 1;
+        cMBRowStart = ((U32) pID->WMP.cLinesCropped + pRect->Y) / linesperMBRow + 1;
         // if current request starts before current state, then rewind.
         if (cMBRowStart < pID->WMP.DecoderCurrAlphaMBRow) 
         {
@@ -2115,7 +2127,7 @@ ERR PKImageDecode_Copy_WMP(
         }
 
         // If we're past the top of the image, then we're done, so terminate
-        if (linesperMBRow * (cMBRow - 1) >= pID->WMP.wmiI.cROIHeight) {
+        if (linesperMBRow * (cMBRow - 1) >= (U32) pID->WMP.cLinesCropped + pID->WMP.wmiI.cROIHeight) {
             FailIf(ICERR_OK != ImageStrDecTerm(pID->WMP.ctxSC_Alpha), WMP_errFail);
         }
         pID->WMP.DecoderCurrAlphaMBRow = cMBRow; // Set to next possible MBRow that is decodable
