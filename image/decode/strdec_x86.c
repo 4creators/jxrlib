@@ -425,6 +425,10 @@ Loop0:
 
 Int outputMBRow_RGB24_Lossless_1(CWMImageStrCodec* pSC)
 {
+#ifdef REENTRANT_MODE
+    const size_t cHeight = min((pSC->m_Dparam->cROIBottomY + 1) - (pSC->cRow - 1) * 16, 16);
+    const size_t iFirstRow = ((pSC->cRow - 1) * 16 > pSC->m_Dparam->cROITopY ? 0 : (pSC->m_Dparam->cROITopY & 0xf));
+#endif
     const size_t cbRGB = pSC->WMIBI.cbStride;
     const U8* const pbRGB = (U8*)pSC->WMIBI.pv + cbRGB * (pSC->cRow - 1) * 16;
 
@@ -447,6 +451,10 @@ Int outputMBRow_RGB24_Lossless_1(CWMImageStrCodec* pSC)
 
     storeRGB24_5(pbY + 64 * 0, pbU - pbY, pbRGB + cbRGB *  0, cbRGB, cmbColumn);
     storeRGB24_5(pbY + 64 * 2, pbU - pbY, pbRGB + cbRGB *  8, cbRGB, cmbColumn);
+
+#ifdef REENTRANT_MODE
+    pSC->WMIBI.cLinesDecoded = cHeight - iFirstRow;
+#endif
     return ICERR_OK;
 }
 
@@ -1052,6 +1060,10 @@ Loop0:
 
 Int outputMBRow_RGB24_Lossy_3(CWMImageStrCodec* pSC)
 {
+#ifdef REENTRANT_MODE
+    const size_t cHeight = min((pSC->m_Dparam->cROIBottomY + 1) - (pSC->cRow - 1) * 16, 16);
+    const size_t iFirstRow = ((pSC->cRow - 1) * 16 > pSC->m_Dparam->cROITopY ? 0 : (pSC->m_Dparam->cROITopY & 0xf));
+#endif
     const size_t cbRGB = pSC->WMIBI.cbStride;
     const U8* const pbRGB = (U8*)pSC->WMIBI.pv + cbRGB * (pSC->cRow - 1) * 16;
 
@@ -1078,6 +1090,10 @@ Int outputMBRow_RGB24_Lossy_3(CWMImageStrCodec* pSC)
         Shift);
     storeRGB24_3(pbY + 64 * 2, pbU - pbY, pbRGB + cbRGB *  8, cbRGB, cmbColumn,
         Shift);
+
+#ifdef REENTRANT_MODE
+    pSC->WMIBI.cLinesDecoded = cHeight - iFirstRow;
+#endif
     return ICERR_OK;
 }
 #endif
