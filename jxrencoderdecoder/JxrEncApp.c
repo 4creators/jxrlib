@@ -457,6 +457,10 @@ ERR WmpEncAppParseArgs(int argc, char* argv[], WMPENCAPPARGS* args)
     Call(WmpEncAppValidateArgs(args));
 
 Cleanup:
+    if (WMP_errSuccess != err)
+    {
+        WmpEncAppUsage(argv[0]);
+    }
     return err;
 }
 
@@ -675,7 +679,8 @@ main(int argc, char* argv[])
 	    {
             if (!args.bOverlapSet)
             {
-		        if (args.fltImageQuality >= 0.5F)
+                // Image width must be at least 2 MB wide for subsampled chroma and two levels of overlap!
+		        if (args.fltImageQuality >= 0.5F || rect.Width < 2 * MB_WIDTH_PIXEL)
 			        pEncoder->WMP.wmiSCP.olOverlap = OL_ONE;
 		        else
 			        pEncoder->WMP.wmiSCP.olOverlap = OL_TWO;
@@ -769,10 +774,5 @@ main(int argc, char* argv[])
     pEncoder->Release(&pEncoder);
 
 Cleanup:
-    if (WMP_errSuccess != err)
-    {
-        WmpEncAppUsage(argv[0]);
-    }
-    
     return (int)err;
 }

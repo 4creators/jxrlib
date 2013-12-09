@@ -281,8 +281,8 @@ ERR ParseBMPHeader(
             break;
 
         case 16:
-//            Call(pWS->Read(pWS, rguColorTable, sizeof(rguColorTable[0] * 3)));
-/*            if (BI_RGB555_MASK_B == rguColorTable[0] && BI_RGB555_MASK_G == rguColorTable[1] && BI_RGB555_MASK_R == rguColorTable[2])
+            Call(pWS->Read(pWS, rguColorTable, sizeof(rguColorTable[0] * 3)));
+            if (BI_RGB555_MASK_B == rguColorTable[0] && BI_RGB555_MASK_G == rguColorTable[1] && BI_RGB555_MASK_R == rguColorTable[2])
             {
                 pID->guidPixFormat = GUID_PKPixelFormat16bppRGB555;
             }
@@ -294,7 +294,6 @@ ERR ParseBMPHeader(
             {
                 Call(WMP_errUnsupportedFormat);
             }
-*/
             pID->EXT.BMP.cbPixel = 2;
             break;
             
@@ -304,17 +303,15 @@ ERR ParseBMPHeader(
             break;
 
         case 32:
-/*            Call(pWS->Read(pWS, rguColorTable, sizeof(rguColorTable[0] * 3)));
+            Call(pWS->Read(pWS, rguColorTable, sizeof(rguColorTable[0] * 3)));
             if (BI_RGB101010_MASK_B == rguColorTable[0] && BI_RGB101010_MASK_G == rguColorTable[1] && BI_RGB101010_MASK_R == rguColorTable[2])
             {
                 pID->guidPixFormat = GUID_PKPixelFormat32bppRGB101010;
             }
             else
             {
-                Call(WMP_errUnsupportedFormat);
+                pID->guidPixFormat = GUID_PKPixelFormat32bppBGRA;
             }
-*/
-//            pID->guidPixFormat = GUID_PKPixelFormat32bppBGRA;
             pID->EXT.BMP.cbPixel = 4;
             break;
             

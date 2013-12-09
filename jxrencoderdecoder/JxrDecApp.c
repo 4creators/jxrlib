@@ -402,6 +402,10 @@ ERR WmpDecAppParseArgs(int argc, char* argv[], WMPDECAPPARGS* args)
     Call(WmpDecAppValidateArgs(args));
 
 Cleanup:
+    if (WMP_errSuccess != err)
+    {
+        WmpDecAppUsage(argv[0]);
+    }
     return err;
 }
 
@@ -634,10 +638,6 @@ Cleanup:
     if (WMP_errUnsupportedFormat == err)
     {
         printf("*** ERROR: Unsupported format in JPEG XR ***\n");
-    }
-    else if (WMP_errSuccess != err)
-    {
-        WmpDecAppUsage(argv[0]);
     }
     
     return (int)err;
