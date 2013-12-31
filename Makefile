@@ -119,7 +119,7 @@ libjxrglue.a: $(OBJ_GLUE) $(OBJ_TEST)
 ##
 
 LIBRARIES=libjxrglue.a libjpegxr.a
-LIBS=-L. $(LIBRARIES) -lm
+LIBS=-L. $(shell echo $(LIBRARIES) | sed -e 's/lib\([^ ]*\)\.a/-l\1/g') -lm
 ENCAPP=JxrEncApp
 
 $(ENCAPP): $(LIBRARIES) 
