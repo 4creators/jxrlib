@@ -39,7 +39,14 @@ DIR_GLUE=jxrgluelib
 DIR_TEST=jxrtestlib
 DIR_EXEC=jxrencoderdecoder
 
-CFLAGS=-I. -Icommon/include -I$(DIR_SYS) -D__ANSI__ -DDISABLE_PERF_MEASUREMENT -w -O
+## Are we building shared?
+ifneq ($(SHARED),)
+PICFLAG=-fPIC
+else
+PICFLAG=
+endif
+
+CFLAGS=-I. -Icommon/include -I$(DIR_SYS) -D__ANSI__ -DDISABLE_PERF_MEASUREMENT -w $(PICFLAG) -O
 ##
 ## Add following flag to CFLAGS above if target is a big endian machine
 ## -D_BIG__ENDIAN_
@@ -85,6 +92,9 @@ libjpegxr.a: $(OBJ_ENC) $(OBJ_DEC) $(OBJ_SYS)
 	ar rvu $@ $(OBJ_ENC) $(OBJ_DEC) $(OBJ_SYS)
 	ranlib $@
 
+libjpegxr.so: $(OBJ_ENC) $(OBJ_DEC) $(OBJ_SYS)
+	$(CC) -shared -o $@ $(OBJ_ENC) $(OBJ_DEC) $(OBJ_SYS)
+
 ##--------------------------------
 ##
 ## Glue files
@@ -113,13 +123,21 @@ libjxrglue.a: $(OBJ_GLUE) $(OBJ_TEST)
 	ar rvu $@ $(OBJ_GLUE) $(OBJ_TEST)
 	ranlib $@
 
+libjxrglue.so: $(OBJ_GLUE) $(OBJ_TEST)
+	$(CC) -shared -o $@ -L. -ljpegxr $(OBJ_GLUE) $(OBJ_TEST)
+
 ##--------------------------------
 ##
 ## Enc app files
 ##
 
-LIBRARIES=libjxrglue.a libjpegxr.a
-LIBS=-L. $(shell echo $(LIBRARIES) | sed -e 's/lib\([^ ]*\)\.a/-l\1/g') -lm
+ifneq ($(SHARED),)
+LIBRARIES=libjpegxr.so libjxrglue.so
+else
+LIBRARIES=libjpegxr.a libjxrglue.so
+endif
+
+LIBS=-L. $(shell echo $(LIBRARIES) | sed -e 's/lib\([^ ]*\)\.\(a\|so\)/-l\1/g') -lm
 ENCAPP=JxrEncApp
 
 $(ENCAPP): $(LIBRARIES) 
@@ -142,6 +160,6 @@ $(DECAPP): $(LIBRARIES)
 all: $(ENCAPP) $(DECAPP)
 
 clean:
-	rm -rf *App *.o libj*.a 
+	rm -rf *App *.o libj*.a libj*.so
 
 ##
