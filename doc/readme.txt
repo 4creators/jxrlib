@@ -37,11 +37,11 @@ relative to this base path.
 
 The main directory contains a Unix/Linux compatible make file for building the
 encoder and decoder, and associated libraries, including support for big endian
-or little endian processor architecture.  It is the developer's responsibility to
-properly organize all the source files according to the paths defined in this
-make file for its correct  operation.  This is provided as a convenience for
-cross-platform developers and to demonstrate the correct operation of the encoder
-and decoder on big endian systems.
+or little endian processor architecture by setting BIG_ENDIAN=1 at build time.
+It is the developer's responsibility to properly organize all the source files
+according to the paths defined in this make file for its correct operation.
+This is provided as a convenience for cross-platform developers and to demonstrate
+the correct operation of the encoder and decoder on big endian systems.
 
 To build static libraries:
 

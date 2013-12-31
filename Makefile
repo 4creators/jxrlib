@@ -46,11 +46,14 @@ else
 PICFLAG=
 endif
 
-CFLAGS=-I. -Icommon/include -I$(DIR_SYS) -D__ANSI__ -DDISABLE_PERF_MEASUREMENT -w $(PICFLAG) -O
-##
-## Add following flag to CFLAGS above if target is a big endian machine
-## -D_BIG__ENDIAN_
-##
+ifneq ($(BIG_ENDIAN),)
+ENDIANFLAG=-D_BIG__ENDIAN_
+else
+ENDIANFLAG
+endif
+
+CFLAGS=-I. -Icommon/include -I$(DIR_SYS) $(ENDIANFLAG) -D__ANSI__ -DDISABLE_PERF_MEASUREMENT -w $(PICFLAG) -O
+
 ##--------------------------------
 ##
 ## Common files
