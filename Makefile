@@ -137,7 +137,7 @@ libjxrglue.so: $(OBJ_GLUE) $(OBJ_TEST)
 ifneq ($(SHARED),)
 LIBRARIES=libjpegxr.so libjxrglue.so
 else
-LIBRARIES=libjpegxr.a libjxrglue.so
+LIBRARIES=libjxrglue.a libjpegxr.a
 endif
 
 LIBS=-L. $(shell echo $(LIBRARIES) | sed -e 's/lib\([^ ]*\)\.\(a\|so\)/-l\1/g') -lm
