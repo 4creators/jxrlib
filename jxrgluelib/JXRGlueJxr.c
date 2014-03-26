@@ -2180,6 +2180,40 @@ ERR PKImageDecode_GetColorContext_WMP(PKImageDecode *pID, U8 *pbColorContext, U3
 }
 
 
+ERR PKImageDecode_GetXMPMetadata_WMP(PKImageDecode *pID, U8 *pbXMPMetadata, U32 *pcbXMPMetadata)
+{
+    return PKImageDecode_GetMetadata_WMP(pID, pID->WMP.wmiDEMisc.uXMPMetadataOffset,
+        pID->WMP.wmiDEMisc.uXMPMetadataByteCount, pbXMPMetadata, pcbXMPMetadata);
+}
+
+
+ERR PKImageDecode_GetEXIFMetadata_WMP(PKImageDecode *pID, U8 *pbEXIFMetadata, U32 *pcbEXIFMetadata)
+{
+    return PKImageDecode_GetMetadata_WMP(pID, pID->WMP.wmiDEMisc.uEXIFMetadataOffset,
+        pID->WMP.wmiDEMisc.uEXIFMetadataByteCount, pbEXIFMetadata, pcbEXIFMetadata);
+}
+
+
+ERR PKImageDecode_GetGPSInfoMetadata_WMP(PKImageDecode *pID, U8 *pbGPSInfoMetadata, U32 *pcbGPSInfoMetadata)
+{
+    return PKImageDecode_GetMetadata_WMP(pID, pID->WMP.wmiDEMisc.uGPSInfoMetadataOffset,
+        pID->WMP.wmiDEMisc.uGPSInfoMetadataByteCount, pbGPSInfoMetadata, pcbGPSInfoMetadata);
+}
+
+
+ERR PKImageDecode_GetIPTCNAAMetadata_WMP(PKImageDecode *pID, U8 *pbIPTCNAAMetadata, U32 *pcbIPTCNAAMetadata)
+{
+    return PKImageDecode_GetMetadata_WMP(pID, pID->WMP.wmiDEMisc.uIPTCNAAMetadataOffset,
+        pID->WMP.wmiDEMisc.uIPTCNAAMetadataByteCount, pbIPTCNAAMetadata, pcbIPTCNAAMetadata);
+}
+
+
+ERR PKImageDecode_GetPhotoshopMetadata_WMP(PKImageDecode *pID, U8 *pbPhotoshopMetadata, U32 *pcbPhotoshopMetadata)
+{
+    return PKImageDecode_GetMetadata_WMP(pID, pID->WMP.wmiDEMisc.uPhotoshopMetadataOffset,
+        pID->WMP.wmiDEMisc.uPhotoshopMetadataByteCount, pbPhotoshopMetadata, pcbPhotoshopMetadata);
+}
+
 
 ERR PKImageDecode_GetDescriptiveMetadata_WMP(PKImageDecode *pID, DESCRIPTIVEMETADATA *pDescMetadata)
 {
