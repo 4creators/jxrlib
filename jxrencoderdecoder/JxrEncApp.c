@@ -58,7 +58,7 @@ void WmpEncAppUsage(const char* szExe)
     printf("  -i input.bmp/tif/hdr         Input image file name" CRLF);
     printf("                               bmp: <=8bpc, BGR" CRLF);
     printf("                               tif: >=8bpc, RGB" CRLF);
-    printf("                               hdr: 24bppRGBE only" CRLF);
+    printf("                               hdr: 32bppRGBE only" CRLF);
     printf(CRLF);
 
     printf("  -o output.jxr                Output JPEG XR file name" CRLF);
@@ -130,7 +130,7 @@ void WmpEncAppUsage(const char* szExe)
     printf("  -l overlapping               0: No overlapping" CRLF);
     printf("                               1: One level overlapping (default)" CRLF);
     printf("                               2: Two level overlapping" CRLF);
-    printf("     (if not set is One for quality > 0.4 or Two for quality <= 0.4)" CRLF);
+    printf("     (if not set is One for quality >= 0.5 or Two for quality < 0.5)" CRLF);
     printf(CRLF);
 
     printf("  -f                           Turn off frequency order bit stream (to spatial)" CRLF);
@@ -170,7 +170,7 @@ void WmpEncAppUsage(const char* szExe)
     printf("                               2: Skip highpass" CRLF);    
     printf("                               3: Skip highpass & lowpass (DC only)" CRLF);    
     printf(CRLF);
-    printf("Eg: %s -i input.bmp -o output.jxr -q 10" CRLF, szExe);
+    printf("Eg: %s -i input.bmp -o output.jxr -q 0.9" CRLF, szExe);
 }
 
 void WmpEncAppShowArgs(WMPENCAPPARGS* args)
@@ -670,9 +670,8 @@ main(int argc, char* argv[])
         Call(pEncoder->Initialize(pEncoder, pEncodeStream, &args.wmiSCP, sizeof(args.wmiSCP)));
 
 	    //ImageQuality  Q (BD==1)  Q (BD==8)   Q (BD==16)  Q (BD==32F) Subsample   Overlap
-	    //[0.0, 0.4]    8-IQ*5     (see table) (see table) (see table) 4:4:4       2
-	    //(0.4, 0.8)    8-IQ*5     (see table) (see table) (see table) 4:4:4       1
-	    //[0.8, 1.0)    8-IQ*5     (see table) (see table) (see table) 4:4:4       1
+	    //[0.0, 0.5)    8-IQ*5     (see table) (see table) (see table) 4:2:0       2
+	    //[0.5, 1.0)    8-IQ*5     (see table) (see table) (see table) 4:4:4       1
 	    //[1.0, 1.0]    1          1           1           1           4:4:4       0
 	
         if (args.fltImageQuality < 1.0F)
