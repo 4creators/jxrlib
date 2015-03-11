@@ -2566,7 +2566,7 @@ Int StrIODecTerm(CWMImageStrCodec* pSC)
 
 Int initLookupTables(CWMImageStrCodec* pSC)
 {
-    static const U8 cbChannels[BDB_MAX] = {1, 1, 2, 2, 2, 4, 4, 4, (U8) -1, (U8) -1, (U8) -1 };
+    static const U8 cbChannels[BDB_MAX] = {1, 1, 2, 2, 2, 4, 4, 4, (U8) -1, (U8) -1, (U8) -1, (U8) -1 };
 
     CWMImageInfo * pII = &pSC->WMII;
     size_t cStrideX, cStrideY;
@@ -2585,11 +2585,12 @@ Int initLookupTables(CWMImageStrCodec* pSC)
         case BD_16:
         case BD_16S:
         case BD_5:
-        case BD_565:
         case BD_16F:
             cStrideY = pSC->WMIBI.cbStride / 2;
             break;
-
+		case BD_565:
+			cStrideY = pSC->WMIBI.cbStride / 3;
+			break;
         case BD_32:
         case BD_32S:
         case BD_32F:
