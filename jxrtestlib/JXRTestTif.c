@@ -325,16 +325,16 @@ ERR WriteTifHeader(
 
     if (tifDEMisc.iPhotometricInterpretation == PK_PI_CMYK)
     {
-        TifDE tifDE = {TIF_tagInkSet, 3, 1, 1};
-        Call(WriteTifDE(pS, offPos, &tifDE)); offPos += 12;
+        TifDE tmpDE = {TIF_tagInkSet, 3, 1, 1};
+        Call(WriteTifDE(pS, offPos, &tmpDE)); offPos += 12;
     }
 
     if (PI.grBit & PK_pixfmtHasAlpha)
     {
-        TifDE tifDE = {TIF_tagExtraSamples, 3, 1, 1};
+        TifDE tmpDE = {TIF_tagExtraSamples, 3, 1, 1};
         if (!(PI.grBit & PK_pixfmtPreMul))
-            tifDE.uValueOrOffset++;
-        Call(WriteTifDE(pS, offPos, &tifDE)); offPos += 12;
+            tmpDE.uValueOrOffset++;
+        Call(WriteTifDE(pS, offPos, &tmpDE)); offPos += 12;
     }
 
     tifDE = tifDEs[i++];

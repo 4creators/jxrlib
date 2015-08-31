@@ -1664,9 +1664,9 @@ Int outputMBRow(CWMImageStrCodec * pSC)
 
 #define fixupFullSize(type, nCh) \
 for(iRow = iFirstRow; iRow < cHeight; iRow ++) {\
-    size_t iY;\
-    for(iColumn = iFirstColumn, iY = pOffsetY[iRow]; iColumn < cWidth; iColumn ++){\
-        type *pT = (type*)(U8 *)pSC->WMIBI.pv + iY + pOffsetX[iColumn];\
+    size_t iOffsetY;\
+    for(iColumn = iFirstColumn, iOffsetY = pOffsetY[iRow]; iColumn < cWidth; iColumn ++){\
+        type *pT = (type*)(U8 *)pSC->WMIBI.pv + iOffsetY + pOffsetX[iColumn];\
         pT[2] = pT[1] = pT[0]; \
         pT += nCh; \
     } \
@@ -2389,9 +2389,9 @@ Int decodeThumbnail(CWMImageStrCodec * pSC)
 
 #define fixupThumb(type, nCh) \
 for(iRow = iFirstRow; iRow < cHeight; iRow += tScale) {\
-    size_t iY;\
-    for(iColumn = iFirstColumn, iY = pOffsetY[iRow >> nBits]; iColumn < cWidth; iColumn += tScale){\
-        type *pT = (type*)((U8 *)pSC->WMIBI.pv + pOffsetX[iColumn >> nBits] + iY);\
+    size_t iOffsetY;\
+    for(iColumn = iFirstColumn, iOffsetY = pOffsetY[iRow >> nBits]; iColumn < cWidth; iColumn += tScale){\
+        type *pT = (type*)((U8 *)pSC->WMIBI.pv + pOffsetX[iColumn >> nBits] + iOffsetY);\
         pT[iB] = pT[1] = pT[iR]; \
     } \
 } \
