@@ -120,6 +120,9 @@ ERR PKImageEncode_WritePixels_IYUV(
 
     if(pY == NULL || pU == NULL || pV == NULL)
     {
+        free(pY);
+        free(pU);
+        free(pV);
         return ICERR_ERROR;
     }
 
@@ -198,6 +201,9 @@ ERR PKImageEncode_WritePixels_YUV422(
 
     if(pY == NULL || pU == NULL || pV == NULL)
     {
+        free(pY);
+        free(pU);
+        free(pV);
         return ICERR_ERROR;
     }
 //YYUV
@@ -273,6 +279,9 @@ ERR PKImageEncode_WritePixels_YUV444(
 
     if(pY == NULL || pU == NULL || pV == NULL)
     {
+        free(pY);
+        free(pU);
+        free(pV);
         return ICERR_ERROR;
     }
 
@@ -491,6 +500,9 @@ ERR PKImageDecode_Copy_IYUV(
 
     if(pY == NULL || pU == NULL || pV == NULL)
     {
+        free(pY);
+        free(pU);
+        free(pV);
         return ICERR_ERROR;
     }
 
@@ -564,6 +576,9 @@ ERR PKImageDecode_Copy_YUV422(
 
     if(pY == NULL || pU == NULL || pV == NULL)
     {
+        free(pY);
+        free(pU);
+        free(pV);
         return ICERR_ERROR;
     }
 
@@ -635,6 +650,9 @@ ERR PKImageDecode_Copy_YUV444(
 
     if(pY == NULL || pU == NULL || pV == NULL)
     {
+        free(pY);
+        free(pU);
+        free(pV);
         return ICERR_ERROR;
     }
 
