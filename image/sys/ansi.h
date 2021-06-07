@@ -42,8 +42,6 @@
 //================================
 // common defines
 //================================
-#define FORCE_INLINE
-#define CDECL
 #if __LP64__
 #define UINTPTR_T unsigned long long
 #define INTPTR_T long long
@@ -51,11 +49,4 @@
 #define UINTPTR_T unsigned int
 #define INTPTR_T int
 #endif
-
-
-//================================
-// quantization optimization
-//================================
-//#define RECIP_QUANT_OPT
-
 
