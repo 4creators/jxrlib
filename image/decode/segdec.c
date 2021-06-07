@@ -63,7 +63,9 @@ static U32 _FORCEINLINE _load4(void* pv)
     v |= ((U32)((U16 *) pv)[1]) << 16;
     return _byteswap_ulong(v);
 #else // _M_IA64
-    return _byteswap_ulong(*(U32*)pv);
+    U32 v;
+    memcpy(&v, pv, sizeof(U32));
+    return _byteswap_ulong(v);
 #endif // _M_IA64
 #endif // _BIG__ENDIAN_
 }
