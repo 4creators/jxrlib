@@ -27,7 +27,7 @@
 //*@@@---@@@@******************************************************************
 #ifndef ANSI
 #define _CRT_SECURE_NO_WARNINGS
-#endif ANSI
+#endif // ANSI
 
 #include <stdlib.h>
 
