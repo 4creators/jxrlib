@@ -28,6 +28,8 @@
 
 #include "strcodec.h"
 
+#include <limits.h>
+
 #ifdef MEM_TRACE
 #define TRACE_MALLOC    1
 #define TRACE_NEW       0
@@ -459,7 +461,7 @@ Void AdaptDiscriminant (CAdaptiveHuffman *pAdHuff)
     assert (t < gMaxTables[iSym]);
 
     //pAdHuff->m_iDiscriminant >>= 1;
-    pAdHuff->m_iLowerBound = (t == 0) ? (-1 << 31) : -THRESHOLD;
+    pAdHuff->m_iLowerBound = (t == 0) ? INT_MIN : -THRESHOLD;
     pAdHuff->m_iUpperBound = (t == gMaxTables[iSym] - 1) ? (1 << 30) : THRESHOLD;
 
     switch (iSym) {

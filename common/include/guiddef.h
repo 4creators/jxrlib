@@ -90,7 +90,9 @@ typedef struct _GUID {
     EXTERN_C const GUID FAR name
 #endif // INITGUID
 
+#if _MSC_VER < 1900
 #define DEFINE_OLEGUID(name, l, w1, w2) DEFINE_GUID(name, l, w1, w2, 0xC0,0,0,0,0,0,0,0x46)
+#endif
 
 #ifndef _GUIDDEF_H_
 #define _GUIDDEF_H_

@@ -482,8 +482,10 @@ Int StrIOEncInit(CWMImageStrCodec* pSC)
                 pSC->ppTempFile[i] = (char *)malloc(FILENAME_MAX * sizeof(char));
                 if(pSC->ppTempFile[i] == NULL) return ICERR_ERROR;
 
-                if ((pFilename = tmpnam(NULL)) == NULL)
+                char tmpnambuf[] = {'f', 'i', 'l', 'e', 'X', 'X', 'X', 'X', 'X', 'X', '\0'};
+                if (mkstemp(tmpnambuf) == -1)
                     return ICERR_ERROR;                
+                pFilename = tmpnambuf;
                 strcpy(pSC->ppTempFile[i], pFilename);
 #endif
                 if(CreateWS_File(pSC->ppWStream + i, pFilename, "w+b") != ICERR_OK) return ICERR_ERROR;                

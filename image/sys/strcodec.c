@@ -671,6 +671,7 @@ ERR detach_SB(SimpleBitIO* pSB)
 #ifdef _BIG__ENDIAN_
 #define _byteswap_ulong(x)  (x)
 #else // _BIG__ENDIAN_
+#if _MSC_VER < 1924
 U32 _byteswap_ulong(U32 bits)
 {
     U32 r = (bits & 0xffu) << 24;
@@ -680,6 +681,7 @@ U32 _byteswap_ulong(U32 bits)
 
     return r;
 }
+#endif // _MSC_VER
 #endif // _BIG__ENDIAN_
 #endif
 
@@ -694,7 +696,9 @@ U32 load4BE(void* pv)
     v |= ((U32)((U16 *) pv)[1]) << 16;
     return _byteswap_ulong(v);
 #else // _M_IA64
-    return _byteswap_ulong(*(U32*)pv);
+    U32 v;
+    memcpy(&v, pv, sizeof(U32));
+    return _byteswap_ulong(v);
 #endif // _M_IA64
 #endif // _BIG__ENDIAN_
 }

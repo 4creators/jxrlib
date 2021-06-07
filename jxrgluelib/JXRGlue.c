@@ -430,6 +430,34 @@ Cleanup:
     return err;
 }
 
+ERR PKCodecFactory_CreateDecoderFromMemory(char *inBuffer, int size, PKImageDecode **ppDecoder)
+{
+    ERR err = WMP_errSuccess;
+
+    char *pExt = ".jxr";
+    const PKIID *pIID = NULL;
+
+    struct WMPStream *pStream = NULL;
+    PKImageDecode *pDecoder = NULL;
+
+    // get decode PKIID
+    Call(GetImageDecodeIID(pExt, &pIID));
+
+    // create stream
+    Call(CreateWS_Memory(&pStream, inBuffer, size));
+
+    // Create decoder
+    Call(PKCodecFactory_CreateCodec(pIID, (void **)ppDecoder));
+    pDecoder = *ppDecoder;
+
+    // attach stream to decoder
+    Call(pDecoder->Initialize(pDecoder, pStream));
+    pDecoder->fStreamOwner = !0;
+
+Cleanup:
+    return err;
+}
+
 ERR PKCodecFactory_CreateFormatConverter(PKFormatConverter** ppFConverter)
 {
     ERR err = WMP_errSuccess;
@@ -474,6 +502,7 @@ ERR PKCreateCodecFactory(PKCodecFactory** ppCFactory, U32 uVersion)
 
     pCFactory->CreateCodec = PKCodecFactory_CreateCodec;
     pCFactory->CreateDecoderFromFile = PKCodecFactory_CreateDecoderFromFile;
+    pCFactory->CreateDecoderFromMemory = PKCodecFactory_CreateDecoderFromMemory;
     pCFactory->CreateFormatConverter = PKCodecFactory_CreateFormatConverter;
     pCFactory->Release = PKCreateCodecFactory_Release;
 

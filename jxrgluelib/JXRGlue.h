@@ -352,6 +352,7 @@ typedef struct tagPKCodecFactory
 {
     ERR (*CreateCodec)(const PKIID*, void**);
     ERR (*CreateDecoderFromFile)(const char*, PKImageDecode**);
+    ERR (*CreateDecoderFromMemory)(char *, int, PKImageDecode **);
     ERR (*CreateFormatConverter)(PKFormatConverter**);
 
     ERR (*Release)(PKCodecFactory**);

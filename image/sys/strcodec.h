@@ -31,7 +31,6 @@
 
 #include "windowsmediaphoto.h"
 #include "common.h"
-// #include "xplatform_image.h"
 
 // added for Xcode PK universal binary
 #ifdef __ppc__
@@ -64,7 +63,7 @@
 
 #ifndef UNREFERENCED_PARAMETER
 #define UNREFERENCED_PARAMETER(P) { (P) = (P); }
-#endif UNREFERENCED_PARAMETER
+#endif // UNREFERENCED_PARAMETER
 
 #ifdef UNDER_CE
 #define PLATFORM_WCE

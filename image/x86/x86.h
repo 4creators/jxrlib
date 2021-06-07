@@ -50,9 +50,3 @@
 #define INTPTR_T intptr_t
 
 
-//================================
-// quantization optimization
-//================================
-#define RECIP_QUANT_OPT
-
-
