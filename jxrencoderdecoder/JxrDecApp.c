@@ -82,8 +82,9 @@ void WmpDecAppUsage(const char* szExe)
     printf(CRLF);
     printf("  -i input.jxr/wdp             Input JPEG XR/HD Photo file name" CRLF);
     printf(CRLF);
-    printf("  -o output.bmp/tif/jxr        Output image file name" CRLF);
+    printf("  -o output.bmp/pnm/tif/jxr    Output image file name" CRLF);
     printf("                               bmp: <=8bpc, BGR" CRLF);
+    printf("                               pnm: >=8bpc, RGB" CRLF);
     printf("                               tif: >=8bpc, RGB" CRLF);
     printf("                               jxr: for compressed domain transcode" CRLF);
     printf(CRLF);

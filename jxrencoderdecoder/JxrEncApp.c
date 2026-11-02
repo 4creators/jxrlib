@@ -55,8 +55,9 @@ void WmpEncAppUsage(const char* szExe)
     printf(CRLF);
     printf("%s [options]..." CRLF, szExe);
     printf(CRLF);
-    printf("  -i input.bmp/tif/hdr         Input image file name" CRLF);
+    printf("  -i input.bmp/pnm/tif/hdr     Input image file name" CRLF);
     printf("                               bmp: <=8bpc, BGR" CRLF);
+    printf("                               pnm: >=8bpc, RGB" CRLF);
     printf("                               tif: >=8bpc, RGB" CRLF);
     printf("                               hdr: 32bppRGBE only" CRLF);
     printf(CRLF);
