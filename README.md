@@ -1,3 +1,10 @@
+# Why does this fork exist?
+This is a fork of the JXRLib code which aims to provide an easy to access to the compiled binary of JXRDecApp.exe and JXREncApp.exe. 
+For some reason they only ever released an uncompiled version of it and no one seems to have decided to make the compiled version easy to access for others. 
+So here I am to do that for everyone.
+
+Original repository: https://github.com/4creators/jxrlib
+
 # jxrlib
 ### JPEG XR Format
 JPEG XR is a still image format based on
